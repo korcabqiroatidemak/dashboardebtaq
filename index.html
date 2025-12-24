@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Dashboard | Kumpulan Proyek</title>
+    <style>
+        :root {
+            --bg-color: #2c3e50;
+            --card-bg: #ecf0f1;
+            --accent: #e74c3c;
+            --text-main: #2c3e50;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0; padding: 0;
+            color: #fff;
+        }
+
+        /* HEADER */
+        .navbar {
+            background: rgba(0,0,0,0.2);
+            padding: 15px 30px;
+            display: flex; justify-content: space-between; align-items: center;
+            backdrop-filter: blur(5px);
+            position: sticky; top: 0; z-index: 100;
+        }
+        .brand { font-size: 24px; font-weight: bold; letter-spacing: 1px; display: flex; align-items: center; gap: 10px; }
+        .controls button {
+            padding: 8px 15px; border: none; border-radius: 20px;
+            font-weight: bold; cursor: pointer; margin-left: 10px;
+            transition: 0.3s;
+        }
+        .btn-add { background: #27ae60; color: white; }
+        .btn-add:hover { background: #2ecc71; }
+        .btn-edit-mode { background: #f39c12; color: white; }
+        .btn-backup { background: #3498db; color: white; }
+
+        /* GRID CONTAINER */
+        .container {
+            max-width: 1200px; margin: 40px auto; padding: 0 20px;
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+        }
+
+        /* KARTU PROYEK */
+        .card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 20px;
+            position: relative;
+            transition: transform 0.3s, box-shadow 0.3s;
+            text-decoration: none;
+            color: var(--text-main);
+            display: flex; flex-direction: column;
+            height: 180px; /* Tinggi tetap agar rapi */
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
+        
+        /* Konten Kartu */
+        .card-icon { font-size: 40px; margin-bottom: 10px; }
+        .card-title { font-size: 18px; font-weight: bold; margin: 0 0 5px 0; }
+        .card-desc { font-size: 13px; color: #7f8c8d; line-height: 1.4; flex: 1; overflow: hidden; }
+
+        /* Link Utama (Klik seluruh kartu) */
+        .card-link-overlay {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 1; cursor: pointer;
+        }
+
+        /* GEAR ICON (Edit Link) */
+        .gear-btn {
+            position: absolute; bottom: 15px; right: 15px;
+            background: #dfe6e9; width: 35px; height: 35px;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 18px; color: #2d3436; z-index: 2; /* Di atas overlay */
+            transition: 0.3s; text-decoration: none; border: none; cursor: pointer;
+        }
+        .gear-btn:hover { background: var(--accent); color: white; transform: rotate(90deg); }
+
+        /* EDIT MODE CONTROLS (Hanya muncul saat Edit Mode ON) */
+        .editor-controls {
+            position: absolute; top: 10px; right: 10px;
+            display: none; gap: 5px; z-index: 5;
+        }
+        .edit-active .editor-controls { display: flex; }
+        .edit-active .card-link-overlay { pointer-events: none; } /* Matikan link saat edit */
+        .edit-active .card { border: 2px dashed #f39c12; }
+        
+        .mini-btn { width: 25px; height: 25px; border-radius: 50%; border: none; cursor: pointer; color: white; font-size: 12px; }
+        .btn-del { background: #c0392b; }
+        .btn-mod { background: #2980b9; }
+        .btn-move { background: #7f8c8d; }
+
+        /* MODAL FORM */
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); z-index: 200; justify-content: center; align-items: center;
+        }
+        .modal-content {
+            background: white; padding: 25px; border-radius: 10px; width: 400px;
+            color: #333;
+        }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 13px; }
+        .form-group input, .form-group textarea {
+            width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box;
+        }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+        
+        /* Empty State */
+        .empty-state { grid-column: 1 / -1; text-align: center; color: #95a5a6; margin-top: 50px; }
+
+        @media (max-width: 600px) {
+            .navbar { flex-direction: column; gap: 10px; }
+            .container { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <div class="brand">🚀 MASTER DASHBOARD</div>
+        <div class="controls">
+            <button class="btn-backup" onclick="backupData()" title="Download Backup JSON">💾 Backup</button>
+            <button class="btn-backup" onclick="restoreData()" title="Upload Backup JSON">📂 Restore</button>
+            <button class="btn-edit-mode" onclick="toggleEditMode()" id="btnMode">🔧 Edit Mode: OFF</button>
+            <button class="btn-add" onclick="openModal()">+ Tambah Proyek</button>
+        </div>
+    </div>
+
+    <div class="container" id="cardContainer">
+        </div>
+
+    <div class="modal" id="projectModal">
+        <div class="modal-content">
+            <h3 id="modalTitle">Tambah Proyek Baru</h3>
+            <input type="hidden" id="editIndex"> <div class="form-group">
+                <label>Judul Proyek</label>
+                <input type="text" id="inpTitle" placeholder="Contoh: Cetak Ijazah v1">
+            </div>
+            <div class="form-group">
+                <label>Deskripsi Singkat</label>
+                <textarea id="inpDesc" rows="2" placeholder="Keterangan fungsi aplikasi..."></textarea>
+            </div>
+            <div class="form-group">
+                <label>Ikon (Emoji atau FontAwesome)</label>
+                <input type="text" id="inpIcon" placeholder="Contoh: 🎓 atau 📝" value="📂">
+            </div>
+            <div class="form-group">
+                <label>Link Output (HTML File)</label>
+                <input type="text" id="inpLink" placeholder="folder/file.html">
+            </div>
+            <div class="form-group">
+                <label>Link Edit (Source Code / Editor)</label>
+                <input type="text" id="inpEditLink" placeholder="view-source:folder/file.html">
+            </div>
+            
+            <div class="modal-actions">
+                <button onclick="closeModal()" style="background:#95a5a6; color:white; border:none; padding:8px 15px; border-radius:5px; cursor:pointer;">Batal</button>
+                <button onclick="saveProject()" style="background:#27ae60; color:white; border:none; padding:8px 15px; border-radius:5px; cursor:pointer;">Simpan</button>
+            </div>
+        </div>
+    </div>
+
+    <input type="file" id="fileInput" style="display: none;" onchange="handleFileSelect(this)">
+
+<script>
+    // --- 1. INISIALISASI DATA ---
+    // Cek apakah ada data di LocalStorage, jika tidak, pakai data awal kosong
+    let projects = JSON.parse(localStorage.getItem('myProjectsDB')) || [];
+    let isEditMode = false;
+
+    // --- 2. FUNGSI RENDER (MENAMPILKAN KARTU) ---
+    function render() {
+        const container = document.getElementById('cardContainer');
+        container.innerHTML = ''; // Bersihkan kontainer
+
+        if (projects.length === 0) {
+            container.innerHTML = `<div class="empty-state"><h3>Belum ada proyek. Klik "+ Tambah Proyek" untuk memulai.</h3></div>`;
+            return;
+        }
+
+        projects.forEach((p, index) => {
+            // Cek apakah link edit ada isinya, kalau kosong arahkan ke link biasa
+            const editUrl = p.editLink ? p.editLink : '#';
+            const editTarget = p.editLink ? '_blank' : '';
+
+            const card = document.createElement('div');
+            card.className = `card ${isEditMode ? 'edit-active' : ''}`;
+            card.innerHTML = `
+                <div class="editor-controls">
+                    <button class="mini-btn btn-move" onclick="moveProject(${index}, -1)" title="Geser Kiri">◀</button>
+                    <button class="mini-btn btn-move" onclick="moveProject(${index}, 1)" title="Geser Kanan">▶</button>
+                    <button class="mini-btn btn-mod" onclick="editProject(${index})" title="Edit Data">✎</button>
+                    <button class="mini-btn btn-del" onclick="deleteProject(${index})" title="Hapus">✖</button>
+                </div>
+
+                <div class="card-icon">${p.icon}</div>
+                <div class="card-title">${p.title}</div>
+                <div class="card-desc">${p.desc}</div>
+
+                <a href="${p.link}" class="card-link-overlay" target="_blank" title="Buka Aplikasi"></a>
+                
+                <a href="${editUrl}" target="${editTarget}" class="gear-btn" title="Edit Script / Setting">
+                    ⚙
+                </a>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    // --- 3. LOGIKA CRUD (CREATE, READ, UPDATE, DELETE) ---
+
+    function openModal() {
+        document.getElementById('editIndex').value = '-1'; // -1 artinya mode tambah baru
+        document.getElementById('modalTitle').innerText = 'Tambah Proyek Baru';
+        // Reset form
+        document.getElementById('inpTitle').value = '';
+        document.getElementById('inpDesc').value = '';
+        document.getElementById('inpIcon').value = '📂';
+        document.getElementById('inpLink').value = '';
+        document.getElementById('inpEditLink').value = '';
+        
+        document.getElementById('projectModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+        document.getElementById('projectModal').style.display = 'none';
+    }
+
+    function saveProject() {
+        const title = document.getElementById('inpTitle').value;
+        const desc = document.getElementById('inpDesc').value;
+        const icon = document.getElementById('inpIcon').value;
+        const link = document.getElementById('inpLink').value;
+        const editLink = document.getElementById('inpEditLink').value;
+        const index = parseInt(document.getElementById('editIndex').value);
+
+        if(!title || !link) return alert("Judul dan Link Output wajib diisi!");
+
+        const data = { title, desc, icon, link, editLink };
+
+        if (index === -1) {
+            // Tambah Baru
+            projects.push(data);
+        } else {
+            // Update Existing
+            projects[index] = data;
+        }
+
+        saveToLocal();
+        closeModal();
+        render();
+    }
+
+    function deleteProject(index) {
+        if(confirm("Yakin ingin menghapus proyek ini dari dashboard?")) {
+            projects.splice(index, 1);
+            saveToLocal();
+            render();
+        }
+    }
+
+    function editProject(index) {
+        const p = projects[index];
+        document.getElementById('editIndex').value = index;
+        document.getElementById('modalTitle').innerText = 'Edit Data Proyek';
+        
+        document.getElementById('inpTitle').value = p.title;
+        document.getElementById('inpDesc').value = p.desc;
+        document.getElementById('inpIcon').value = p.icon;
+        document.getElementById('inpLink').value = p.link;
+        document.getElementById('inpEditLink').value = p.editLink;
+
+        document.getElementById('projectModal').style.display = 'flex';
+    }
+
+    // --- 4. FITUR REORDER (GESER URUTAN) ---
+    function moveProject(index, direction) {
+        const newIndex = index + direction;
+        // Cek batas array
+        if (newIndex < 0 || newIndex >= projects.length) return;
+        
+        // Swap elemen array
+        const temp = projects[index];
+        projects[index] = projects[newIndex];
+        projects[newIndex] = temp;
+
+        saveToLocal();
+        render();
+    }
+
+    // --- 5. SYSTEM & STORAGE ---
+    function saveToLocal() {
+        localStorage.setItem('myProjectsDB', JSON.stringify(projects));
+    }
+
+    function toggleEditMode() {
+        isEditMode = !isEditMode;
+        const btn = document.getElementById('btnMode');
+        if(isEditMode) {
+            btn.innerHTML = "🔧 Edit Mode: ON";
+            btn.style.background = "#e74c3c";
+        } else {
+            btn.innerHTML = "🔧 Edit Mode: OFF";
+            btn.style.background = "#f39c12";
+        }
+        render();
+    }
+
+    // --- 6. BACKUP & RESTORE (JSON FILE) ---
+    function backupData() {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(projects));
+        const downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href", dataStr);
+        downloadAnchorNode.setAttribute("download", "dashboard_backup.json");
+        document.body.appendChild(downloadAnchorNode);
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
+    }
+
+    function restoreData() {
+        document.getElementById('fileInput').click();
+    }
+
+    function handleFileSelect(input) {
+        const file = input.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const json = JSON.parse(e.target.result);
+                if (Array.isArray(json)) {
+                    projects = json;
+                    saveToLocal();
+                    render();
+                    alert("Data berhasil dipulihkan!");
+                } else {
+                    alert("Format file salah!");
+                }
+            } catch (err) {
+                alert("File rusak atau bukan JSON.");
+            }
+        };
+        reader.readAsText(file);
+    }
+
+    // Jalankan render pertama kali
+    render();
+
+</script>
+
+</body>
+</html>
