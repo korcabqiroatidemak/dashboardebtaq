@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard EBTAQ | Secret Access</title>
+    <title>Dashboard EBTAQ | Master Final</title>
     <style>
         :root {
             --bg-color: #f8fafc;
             --card-bg: #ffffff;
             --text-main: #1e293b;
             --accent: #e74c3c;
-            /* Qiraati Gold Theme */
+            /* Default: Qiraati Gold Theme */
             --grad-start: #1a1a1a;
             --grad-end: #FFC40D;
             --nav-text: #FFC40D;
@@ -34,7 +34,18 @@
             min-height: 85px;
         }
 
-        .brand { display: flex; align-items: center; cursor: pointer; position: relative; }
+        .brand { 
+            display: flex; align-items: center; position: relative; 
+            padding: 5px 10px; border-radius: 10px; transition: 0.3s;
+        }
+        body.edit-active .brand {
+            cursor: pointer;
+            outline: 2px dashed rgba(255,255,255,0.5);
+            background: rgba(0,0,0,0.2);
+        }
+        .header-edit-icon { display: none; margin-left:10px; font-size: 18px; color: white; }
+        body.edit-active .header-edit-icon { display: block; }
+
         .brand img { height: 70px; width: auto; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3)); }
         .brand span {
             font-size: 32px; font-weight: 800; margin-left: 20px;
@@ -42,7 +53,7 @@
             color: var(--nav-text); text-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
 
-        /* FLOATING GEAR (EDIT MODE TOGGLE) */
+        /* FLOATING GEAR */
         .floating-gear {
             position: fixed; bottom: 25px; right: 25px;
             width: 45px; height: 45px;
@@ -55,7 +66,7 @@
         .floating-gear:hover { background: var(--accent); transform: rotate(90deg); opacity: 1 !important; }
         .floating-gear svg { width: 24px; height: 24px; fill: currentColor; }
 
-        /* ADMIN CONTROLS */
+        /* CONTROLS */
         .controls { display: flex; gap: 10px; }
         .admin-only { display: none !important; }
         body.edit-active .admin-only { display: inline-flex !important; }
@@ -69,7 +80,7 @@
             display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 30px;
         }
 
-        /* KARTU PROYEK */
+        /* CARD */
         .card {
             background: var(--card-bg); border-radius: 20px; padding: 25px;
             position: relative; transition: all 0.3s ease;
@@ -86,46 +97,48 @@
         .card-desc { font-size: 14px; color: #64748b; line-height: 1.5; }
         .card-link-overlay { position: absolute; inset: 0; z-index: 1; }
 
-        /* SECRET GEAR ACCESS LOGIC */
+        /* SECRET GEAR (Shift + Hover + Wait) */
         .secret-gear {
             position: absolute; bottom: 15px; right: 15px;
             width: 40px; height: 40px; background: var(--grad-end);
             border-radius: 50%; display: flex; align-items: center; justify-content: center;
             opacity: 0; transform: scale(0.5);
-            transition: opacity 0.8s ease, transform 0.8s ease; /* KESABARAN (DELAY) */
+            transition: opacity 0.8s ease, transform 0.8s ease;
             z-index: 10; pointer-events: none;
             box-shadow: 0 0 15px rgba(255, 196, 13, 0.5);
         }
         .secret-gear svg { width: 22px; height: 22px; fill: #1a1a1a; }
+        body.shift-on .card:hover .secret-gear { opacity: 1; transform: scale(1); pointer-events: auto; cursor: pointer; }
 
-        /* TRIPLE CONDITION: body.shift-on + card:hover -> show secret gear */
-        body.shift-on .card:hover .secret-gear {
-            opacity: 1; transform: scale(1);
-            pointer-events: auto;
-            cursor: pointer;
-        }
-
-        /* EDITOR UI (Hanya saat Mode Edit ON) */
+        /* EDITOR UI (RESTORED) */
         .editor-controls { position: absolute; top: 10px; right: 10px; display: none; gap: 5px; z-index: 20; }
         body.edit-active .editor-controls { display: flex; }
         .mini-btn { width: 28px; height: 28px; border-radius: 50%; border: none; cursor: pointer; color: white; display: flex; align-items: center; justify-content: center; }
-        .btn-del { background: #ef4444; } .btn-mod { background: #3b82f6; }
+        .btn-del { background: #ef4444; } 
+        .btn-mod { background: #3b82f6; } 
+        .btn-move { background: #64748b; } /* Tombol Geser Kembali */
 
         /* MODAL */
         .modal {
             display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8);
             z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(5px);
         }
-        .modal-content { background: white; padding: 30px; border-radius: 15px; width: 400px; }
+        .modal-content { background: white; padding: 30px; border-radius: 15px; width: 450px; }
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; font-weight: 700; margin-bottom: 5px; font-size: 13px; }
         .form-group input, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
         .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+        
+        /* THEME GRID */
+        .theme-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 10px; }
+        .theme-opt { height: 40px; border-radius: 8px; cursor: pointer; background: linear-gradient(135deg, var(--s), var(--e)); border: 3px solid transparent; }
+        .theme-opt.active { border-color: #000; transform: scale(1.05); }
+
     </style>
 </head>
 <body id="mainBody">
 
-    <div class="floating-gear" onclick="toggleEditMode()" id="editTrigger">
+    <div class="floating-gear" onclick="toggleEditMode()" id="editTrigger" title="Pengaturan Admin">
         <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.04.17 0 .36.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.04-.22 0-.41-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"></path></svg>
     </div>
 
@@ -133,10 +146,12 @@
         <div class="brand" onclick="openHeaderModal()">
             <img id="navLogo" src="QIRAATI.png" alt="Logo" onerror="this.src='https://via.placeholder.com/70'">
             <span id="navTitle">DASHBOARD EBTAQ</span>
+            <div class="header-edit-icon">✎</div>
         </div>
         <div class="controls">
             <button class="btn-add admin-only" onclick="openModal()">+ Proyek</button>
             <button class="btn-backup admin-only" onclick="backupData()">💾 Backup</button>
+            <button class="btn-backup admin-only" onclick="restoreData()">📂 Restore</button>
         </div>
     </div>
 
@@ -148,7 +163,7 @@
             <input type="hidden" id="editIndex"> 
             <div class="form-group"><label>Judul</label><input type="text" id="inpTitle"></div>
             <div class="form-group"><label>Deskripsi</label><textarea id="inpDesc"></textarea></div>
-            <div class="form-group"><label>Ikon (Emoji)</label><input type="text" id="inpIcon"></div>
+            <div class="form-group"><label>Ikon (Emoji/SVG)</label><input type="text" id="inpIcon"></div>
             <div class="form-group"><label>Link Output</label><input type="text" id="inpLink"></div>
             <div class="form-group"><label>Link Source (Shift+Click)</label><input type="text" id="inpEditLink"></div>
             <div class="modal-actions">
@@ -158,25 +173,70 @@
         </div>
     </div>
 
+    <div class="modal" id="headerModal">
+        <div class="modal-content">
+            <h3 style="margin:0 0 15px 0; border-bottom:1px solid #eee; padding-bottom:10px;">Setting Dashboard</h3>
+            <div class="form-group"><label>Judul Halaman</label><input type="text" id="cfgTitle"></div>
+            <div class="form-group"><label>Nama File Logo</label><input type="text" id="cfgLogo"></div>
+            <div class="form-group">
+                <label>Pilih Tema Warna</label>
+                <div class="theme-grid" id="themeGrid"></div>
+            </div>
+            <div class="modal-actions">
+                <button onclick="closeModal('headerModal')">Batal</button>
+                <button onclick="saveHeaderConfig()" style="background:#1a1a1a; color:white;">Simpan</button>
+            </div>
+        </div>
+    </div>
+
+    <input type="file" id="fileInput" style="display: none;" onchange="handleFileSelect(this)">
+
 <script>
+    // --- DATABASE ---
     let projects = JSON.parse(localStorage.getItem('myProjectsDB')) || [];
+    let config = JSON.parse(localStorage.getItem('dashboardConfig')) || {
+        title: "DASHBOARD EBTAQ", logo: "QIRAATI.png", themeIdx: 7
+    };
     let isEditMode = false;
+    let tempThemeIdx = config.themeIdx;
+
+    const themes = [
+        { s: "#047857", e: "#10b981", t: "#ffffff" }, // Emerald
+        { s: "#1e3a8a", e: "#3b82f6", t: "#ffffff" }, // Midnight
+        { s: "#9a3412", e: "#f97316", t: "#ffffff" }, // Terracotta
+        { s: "#581c87", e: "#a855f7", t: "#ffffff" }, // Purple
+        { s: "#0f766e", e: "#14b8a6", t: "#ffffff" }, // Teal
+        { s: "#be123c", e: "#fb7185", t: "#ffffff" }, // Rose
+        { s: "#334155", e: "#94a3b8", t: "#ffffff" }, // Slate
+        { s: "#1a1a1a", e: "#FFC40D", t: "#FFC40D" }  // Qiraati Gold
+    ];
 
     // --- LOGIKA SHIFT DETECTION ---
     window.addEventListener('keydown', (e) => { if(e.key === 'Shift') document.body.classList.add('shift-on'); });
     window.addEventListener('keyup', (e) => { if(e.key === 'Shift') document.body.classList.remove('shift-on'); });
 
     function render() {
+        // Render Header
+        const theme = themes[config.themeIdx];
+        document.documentElement.style.setProperty('--grad-start', theme.s);
+        document.documentElement.style.setProperty('--grad-end', theme.e);
+        document.documentElement.style.setProperty('--nav-text', theme.t);
+        document.getElementById('navTitle').innerText = config.title;
+        document.getElementById('navLogo').src = config.logo;
+
+        // Render Cards
         const container = document.getElementById('cardContainer');
-        container.innerHTML = '';
+        container.innerHTML = projects.length ? '' : `<div style="grid-column:1/-1; text-align:center; padding:50px; color:#94a3b8;">Dashboard Kosong. Masuk Mode Edit untuk menambah.</div>`;
         
         projects.forEach((p, i) => {
             const card = document.createElement('div');
             card.className = 'card';
             card.innerHTML = `
                 <div class="editor-controls">
-                    <button class="mini-btn btn-mod" onclick="editProject(${i})">✎</button>
-                    <button class="mini-btn btn-del" onclick="deleteProject(${i})">✖</button>
+                    <button class="mini-btn btn-move" onclick="moveProject(${i},-1)" title="Geser Kiri">◀</button>
+                    <button class="mini-btn btn-move" onclick="moveProject(${i},1)" title="Geser Kanan">▶</button>
+                    <button class="mini-btn btn-mod" onclick="editProject(${i})" title="Edit Data">✎</button>
+                    <button class="mini-btn btn-del" onclick="deleteProject(${i})" title="Hapus">✖</button>
                 </div>
                 <div class="secret-gear" onclick="window.open('${p.editLink}', '_blank'); event.stopPropagation();">
                     <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.04.17 0 .36.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.04-.22 0-.41-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"></path></svg>
@@ -190,9 +250,40 @@
         });
     }
 
+    // --- SYSTEM CONTROLS ---
     function toggleEditMode() {
         isEditMode = !isEditMode;
         document.body.classList.toggle('edit-active', isEditMode);
+    }
+
+    function openHeaderModal() {
+        if(!isEditMode) return;
+        document.getElementById('cfgTitle').value = config.title;
+        document.getElementById('cfgLogo').value = config.logo;
+        tempThemeIdx = config.themeIdx;
+        renderThemeOptions();
+        document.getElementById('headerModal').style.display = 'flex';
+    }
+
+    function renderThemeOptions() {
+        const grid = document.getElementById('themeGrid');
+        grid.innerHTML = '';
+        themes.forEach((t, i) => {
+            const opt = document.createElement('div');
+            opt.className = `theme-opt ${i === tempThemeIdx ? 'active' : ''}`;
+            opt.style.setProperty('--s', t.s);
+            opt.style.setProperty('--e', t.e);
+            opt.onclick = () => { tempThemeIdx = i; renderThemeOptions(); };
+            grid.appendChild(opt);
+        });
+    }
+
+    function saveHeaderConfig() {
+        config.title = document.getElementById('cfgTitle').value;
+        config.logo = document.getElementById('cfgLogo').value;
+        config.themeIdx = tempThemeIdx;
+        localStorage.setItem('dashboardConfig', JSON.stringify(config));
+        render(); closeModal('headerModal');
     }
 
     function openModal() {
@@ -203,6 +294,7 @@
 
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
+    // --- CRUD ---
     function saveProject() {
         const data = {
             title: document.getElementById('inpTitle').value,
@@ -230,12 +322,39 @@
         document.getElementById('projectModal').style.display = 'flex';
     }
 
+    // --- FUNGSI GESER (RESTORED) ---
+    function moveProject(i, d) {
+        const ni = i + d;
+        if(ni >= 0 && ni < projects.length) {
+            [projects[i], projects[ni]] = [projects[ni], projects[i]];
+            localStorage.setItem('myProjectsDB', JSON.stringify(projects)); render();
+        }
+    }
+
+    // --- BACKUP RESTORE ---
     function backupData() {
-        const blob = new Blob([JSON.stringify(projects)], {type: 'application/json'});
+        const bundle = { projects, config };
+        const blob = new Blob([JSON.stringify(bundle)], {type: 'application/json'});
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
         a.download = `backup_ebtaq.json`;
         a.click();
+    }
+    
+    function restoreData() { document.getElementById('fileInput').click(); }
+
+    function handleFileSelect(input) {
+        const reader = new FileReader();
+        reader.onload = e => {
+            const data = JSON.parse(e.target.result);
+            if(data.projects && data.config) {
+                projects = data.projects; config = data.config;
+                localStorage.setItem('myProjectsDB', JSON.stringify(projects));
+                localStorage.setItem('dashboardConfig', JSON.stringify(config));
+                render(); alert("Berhasil!");
+            }
+        };
+        reader.readAsText(input.files[0]);
     }
 
     render();
