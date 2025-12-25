@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard EBTAQ | Final System</title>
+    <title>Dashboard EBTAQ | QR System</title>
     <style>
         :root {
             --bg-color: #f8fafc;
@@ -88,37 +88,44 @@
             display: flex; flex-direction: column; height: 200px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.05);
             border-top: 5px solid var(--grad-end);
-            overflow: hidden; /* Penting agar isi tidak bocor */
+            overflow: hidden;
         }
         .card:hover { transform: translateY(-8px); box-shadow: 0 12px 24px rgba(0,0,0,0.1); }
         
         .card-icon { font-size: 45px; margin-bottom: 12px; }
-        /* Memaksa warna SVG mengikuti tema, mengabaikan fill bawaan jika ada sisa */
         .card-icon svg { fill: var(--grad-end); } 
         
-        .card-title { font-size: 20px; font-weight: 800; margin-bottom: 8px; }
+        .card-title { font-size: 20px; font-weight: 800; margin-bottom: 8px; padding-right: 30px; /* Space for QR btn */ }
         .card-desc { font-size: 14px; color: #64748b; line-height: 1.5; }
         .card-link-overlay { position: absolute; inset: 0; z-index: 1; }
 
-        /* --- SECRET GEAR SYSTEM (KEAMANAN SHIFT) --- */
+        /* QR CODE BUTTON (NEW) */
+        .qr-btn {
+            position: absolute; top: 15px; right: 15px;
+            width: 32px; height: 32px;
+            background: rgba(0,0,0,0.05); border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 5; cursor: pointer; transition: 0.2s;
+            color: #94a3b8;
+        }
+        .qr-btn:hover { background: var(--grad-end); color: #fff; transform: scale(1.1); box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+        .qr-btn svg { width: 18px; height: 18px; fill: currentColor; }
+        
+        /* Hide QR button in Edit Mode to avoid clutter */
+        body.edit-active .qr-btn { display: none; }
+
+        /* SECRET GEAR (Shift Security) */
         .secret-gear {
             position: absolute; bottom: 15px; right: 15px;
             width: 40px; height: 40px; background: var(--grad-end);
             border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            opacity: 0; transform: scale(0.5); /* Default Sembunyi */
-            transition: opacity 0.8s ease, transform 0.8s ease; /* Delay Kesabaran */
-            z-index: 10; 
-            pointer-events: none; /* Tidak bisa diklik saat sembunyi */
+            opacity: 0; transform: scale(0.5);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+            z-index: 10; pointer-events: none;
             box-shadow: 0 0 15px rgba(255, 196, 13, 0.5);
         }
         .secret-gear svg { width: 22px; height: 22px; fill: #1a1a1a; }
-        
-        /* Hanya muncul jika body punya class shift-on DAN mouse hover di card */
-        body.shift-on .card:hover .secret-gear { 
-            opacity: 1; transform: scale(1); 
-            pointer-events: auto; /* Bisa diklik saat muncul */
-            cursor: pointer; 
-        }
+        body.shift-on .card:hover .secret-gear { opacity: 1; transform: scale(1); pointer-events: auto; cursor: pointer; }
 
         /* EDITOR UI */
         .editor-controls { position: absolute; top: 10px; right: 10px; display: none; gap: 5px; z-index: 20; }
@@ -126,17 +133,23 @@
         .mini-btn { width: 28px; height: 28px; border-radius: 50%; border: none; cursor: pointer; color: white; display: flex; align-items: center; justify-content: center; }
         .btn-del { background: #ef4444; } .btn-mod { background: #3b82f6; } .btn-move { background: #64748b; }
 
-        /* MODAL */
+        /* MODAL COMMON */
         .modal {
             display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8);
             z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(5px);
         }
-        .modal-content { background: white; padding: 30px; border-radius: 15px; width: 450px; }
+        .modal-content { background: white; padding: 30px; border-radius: 15px; width: 450px; position: relative; }
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; font-weight: 700; margin-bottom: 5px; font-size: 13px; }
         .form-group input, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
         .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
-        
+
+        /* QR MODAL SPECIFIC */
+        #qrDisplay { text-align: center; margin-top: 10px; }
+        #qrImage { width: 200px; height: 200px; border: 10px solid #fff; box-shadow: 0 5px 20px rgba(0,0,0,0.1); border-radius: 10px; }
+        .qr-title { font-weight: 800; font-size: 20px; margin-bottom: 5px; color: var(--text-main); text-align: center; }
+        .qr-link { font-size: 12px; color: #64748b; word-break: break-all; text-align: center; display: block; margin-top: 10px; }
+
         /* THEME GRID */
         .theme-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 10px; }
         .theme-opt { height: 40px; border-radius: 8px; cursor: pointer; background: linear-gradient(135deg, var(--s), var(--e)); border: 3px solid transparent; }
@@ -172,9 +185,12 @@
             <div class="form-group"><label>Judul</label><input type="text" id="inpTitle"></div>
             <div class="form-group"><label>Deskripsi</label><textarea id="inpDesc"></textarea></div>
             <div class="form-group"><label>Ikon (Emoji/SVG)</label>
-                <input type="text" id="inpIcon" placeholder="Paste kode SVG... (Warna fill akan dihapus otomatis)">
+                <input type="text" id="inpIcon" placeholder="Paste kode SVG... (Auto Clean)">
             </div>
-            <div class="form-group"><label>Link Output</label><input type="text" id="inpLink"></div>
+            <div class="form-group"><label>Link Output (Utama)</label><input type="text" id="inpLink"></div>
+            <div class="form-group"><label>Link Khusus QR (Opsional)</label>
+                <input type="text" id="inpQrLink" placeholder="Kosongkan jika sama dengan Link Output">
+            </div>
             <div class="form-group"><label>Link Source (Shift+Click)</label><input type="text" id="inpEditLink"></div>
             <div class="modal-actions">
                 <button onclick="closeModal('projectModal')">Batal</button>
@@ -195,6 +211,19 @@
             <div class="modal-actions">
                 <button onclick="closeModal('headerModal')">Batal</button>
                 <button onclick="saveHeaderConfig()" style="background:#1a1a1a; color:white;">Simpan</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="qrModal" onclick="closeModal('qrModal')">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="qr-title" id="qrTitleDisplay">Judul Proyek</div>
+            <div id="qrDisplay">
+                <img id="qrImage" src="" alt="Loading QR...">
+            </div>
+            <a href="#" target="_blank" class="qr-link" id="qrLinkDisplay">https://example.com</a>
+            <div style="text-align:center; margin-top:20px;">
+                <button onclick="closeModal('qrModal')" style="background:#64748b; color:white; border:none; padding:8px 20px; border-radius:50px; cursor:pointer;">Tutup</button>
             </div>
         </div>
     </div>
@@ -221,13 +250,9 @@
         { s: "#1a1a1a", e: "#FFC40D", t: "#FFC40D" }
     ];
 
-    // --- DETEKSI TOMBOL SHIFT (INTI KEAMANAN) ---
-    window.addEventListener('keydown', (e) => { 
-        if(e.key === 'Shift') document.body.classList.add('shift-on'); 
-    });
-    window.addEventListener('keyup', (e) => { 
-        if(e.key === 'Shift') document.body.classList.remove('shift-on'); 
-    });
+    // --- KEAMANAN SHIFT ---
+    window.addEventListener('keydown', (e) => { if(e.key === 'Shift') document.body.classList.add('shift-on'); });
+    window.addEventListener('keyup', (e) => { if(e.key === 'Shift') document.body.classList.remove('shift-on'); });
 
     function render() {
         const theme = themes[config.themeIdx];
@@ -245,11 +270,16 @@
             card.className = 'card';
             card.innerHTML = `
                 <div class="editor-controls">
-                    <button class="mini-btn btn-move" onclick="moveProject(${i},-1)" title="Geser Kiri">◀</button>
-                    <button class="mini-btn btn-move" onclick="moveProject(${i},1)" title="Geser Kanan">▶</button>
-                    <button class="mini-btn btn-mod" onclick="editProject(${i})" title="Edit Data">✎</button>
-                    <button class="mini-btn btn-del" onclick="deleteProject(${i})" title="Hapus">✖</button>
+                    <button class="mini-btn btn-move" onclick="moveProject(${i},-1)">◀</button>
+                    <button class="mini-btn btn-move" onclick="moveProject(${i},1)">▶</button>
+                    <button class="mini-btn btn-mod" onclick="editProject(${i})">✎</button>
+                    <button class="mini-btn btn-del" onclick="deleteProject(${i})">✖</button>
                 </div>
+                
+                <div class="qr-btn" onclick="showQr(${i}); event.stopPropagation();" title="Scan QR Code">
+                    <svg viewBox="0 0 24 24"><path d="M3 3h6v6H3V3zm2 2v2h2V5H5zm8-2h6v6h-6V3zm2 2v2h2V5h-2zM3 13h6v6H3v-6zm2 2v2h2v-2H5zm13-2h3v2h-3v-2zm-3 2h2v2h-2v-2zm3 2h3v2h-3v-2zM3 21h2v-2H3v2zm4-4h2v2H7v-2zm-4-4h2v2H3v-2zm8 0h2v2h-2v-2zm4 4h2v2h-2v-2zm-4-4h2v2h-2v-2zm4-4h2v2h-2v-2z"></path></svg>
+                </div>
+
                 <div class="secret-gear" onclick="window.open('${p.editLink}', '_blank'); event.stopPropagation();">
                     <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.04.17 0 .36.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.04-.22 0-.41-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"></path></svg>
                 </div>
@@ -260,6 +290,23 @@
             `;
             container.appendChild(card);
         });
+    }
+
+    // --- QR SYSTEM ---
+    function showQr(index) {
+        const p = projects[index];
+        // LOGIKA SMART: Gunakan qrLink jika ada, jika tidak gunakan link utama
+        const targetUrl = p.qrLink ? p.qrLink : p.link;
+        
+        document.getElementById('qrTitleDisplay').innerText = p.title;
+        document.getElementById('qrLinkDisplay').innerText = targetUrl;
+        document.getElementById('qrLinkDisplay').href = targetUrl;
+        
+        // API Call
+        const apiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&color=000000&bgcolor=ffffff&data=${encodeURIComponent(targetUrl)}`;
+        document.getElementById('qrImage').src = apiUrl;
+        
+        document.getElementById('qrModal').style.display = 'flex';
     }
 
     function toggleEditMode() {
@@ -299,27 +346,24 @@
 
     function openModal() {
         document.getElementById('editIndex').value = '-1';
-        ['inpTitle','inpDesc','inpIcon','inpLink','inpEditLink'].forEach(id => document.getElementById(id).value = '');
+        ['inpTitle','inpDesc','inpIcon','inpLink','inpEditLink','inpQrLink'].forEach(id => document.getElementById(id).value = '');
         document.getElementById('projectModal').style.display = 'flex';
     }
 
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
-    // --- CRUD WITH AUTO CLEAN SVG ---
+    // --- CRUD ---
     function saveProject() {
         let iconRaw = document.getElementById('inpIcon').value;
-        
-        // Pembersih SVG: Menghapus atribut fill="warna"
-        if(iconRaw.includes('<svg')) {
-            iconRaw = iconRaw.replace(/fill=['"][^'"]*['"]/gi, "");
-        }
+        if(iconRaw.includes('<svg')) { iconRaw = iconRaw.replace(/fill=['"][^'"]*['"]/gi, ""); }
 
         const data = {
             title: document.getElementById('inpTitle').value,
             desc: document.getElementById('inpDesc').value,
             icon: iconRaw,
             link: document.getElementById('inpLink').value,
-            editLink: document.getElementById('inpEditLink').value
+            editLink: document.getElementById('inpEditLink').value,
+            qrLink: document.getElementById('inpQrLink').value // Data Baru
         };
         const idx = parseInt(document.getElementById('editIndex').value);
         if(!data.title || !data.link) return alert("Wajib diisi!");
@@ -340,6 +384,7 @@
         document.getElementById('inpIcon').value = p.icon;
         document.getElementById('inpLink').value = p.link;
         document.getElementById('inpEditLink').value = p.editLink;
+        document.getElementById('inpQrLink').value = p.qrLink || ''; // Load existing QR link
         document.getElementById('projectModal').style.display = 'flex';
     }
 
