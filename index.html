@@ -3,164 +3,149 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard EBTAQ</title>
+    <title>Master Dashboard EBTAQ</title>
     <style>
+        /* DEFINISI VARIABEL CSS DASAR */
         :root {
-            --bg-color: #2c3e50;
-            --card-bg: #ecf0f1;
-            --accent: #e74c3c; /* Warna Merah/Oranye untuk Edit Mode */
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
             --text-main: #2c3e50;
+            --accent: #e74c3c;
+            /* Default Theme (Emerald) */
+            --grad-start: #047857;
+            --grad-end: #10b981;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-color);
             margin: 0; padding: 0;
-            color: #fff;
-            transition: 0.3s;
+            color: var(--text-main);
+            transition: all 0.4s ease;
         }
 
-        /* HEADER / NAVBAR */
+        /* NAVBAR DENGAN GRADASI DINAMIS */
         .navbar {
-            background: rgba(0,0,0,0.25);
-            padding: 10px 30px; 
+            background: linear-gradient(135deg, var(--grad-start), var(--grad-end));
+            padding: 15px 40px;
             display: flex; justify-content: space-between; align-items: center;
-            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             position: sticky; top: 0; z-index: 100;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-        
-        /* BRAND (LOGO + JUDUL) */
-        .brand { 
-            display: flex; align-items: center; 
-            padding: 5px 10px;
-            border-radius: 8px;
-            transition: 0.3s;
-            position: relative;
-        }
-        /* Efek saat Edit Mode Aktif pada Header */
-        body.edit-active .brand {
-            cursor: pointer;
-            border: 2px dashed var(--accent);
-            background: rgba(231, 76, 60, 0.1);
-        }
-        body.edit-active .brand:hover {
-            background: rgba(231, 76, 60, 0.2);
         }
 
+        /* BRANDING (LOGO & JUDUL BESAR) */
+        .brand {
+            display: flex; align-items: center;
+            padding: 8px 15px; border-radius: 12px;
+            transition: 0.3s; position: relative;
+        }
         .brand img {
-            height: 50px; width: auto;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+            height: 65px; /* Ukuran Logo Konsisten */
+            width: auto;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));
         }
         .brand span {
-            font-size: 20px; font-weight: bold; margin-left: 12px;
-            letter-spacing: 1px; text-transform: uppercase;
-            color: #ecf0f1; text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+            font-size: 32px; /* Ukuran Judul Setara Logo */
+            font-weight: 800; margin-left: 18px;
+            letter-spacing: 1.5px; text-transform: uppercase;
+            color: #ffffff; text-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
 
-        /* Ikon Pensil Edit Header (Hidden by default) */
+        /* EDIT MODE INDICATOR PADA HEADER */
+        body.edit-active .brand {
+            cursor: pointer;
+            outline: 3px dashed rgba(255,255,255,0.6);
+            outline-offset: 4px;
+            background: rgba(255,255,255,0.1);
+        }
         .header-edit-icon {
-            display: none; margin-left: 10px;
+            display: none; position: absolute; -right: 10px; -top: 5px;
             background: var(--accent); color: white;
-            width: 24px; height: 24px; border-radius: 50%;
-            text-align: center; line-height: 24px; font-size: 14px;
+            width: 28px; height: 28px; border-radius: 50%;
+            text-align: center; line-height: 28px; font-size: 16px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
         }
-        body.edit-active .header-edit-icon { display: inline-block; }
+        body.edit-active .header-edit-icon { display: block; }
 
-        /* CONTROLS AREA */
-        .controls { display: flex; gap: 8px; align-items: center; }
-        
+        /* KONTROL NAVIGASI */
+        .controls { display: flex; gap: 12px; align-items: center; }
         .controls button, .controls a.btn-link {
-            padding: 8px 15px; border: none; border-radius: 6px;
-            font-weight: 600; cursor: pointer;
-            transition: 0.2s; font-size: 13px;
-            text-decoration: none; 
-            display: inline-flex; align-items: center; gap: 8px; 
-            color: white;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            padding: 10px 18px; border: none; border-radius: 8px;
+            font-weight: 700; cursor: pointer; transition: 0.3s;
+            font-size: 14px; text-decoration: none;
+            display: inline-flex; align-items: center; gap: 8px; color: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
-        .controls button svg, .controls a svg { width: 18px; height: 18px; fill: currentColor; }
-        .controls button:hover { transform: translateY(-2px); }
-
-        /* KELAS KHUSUS UNTUK MENYEMBUNYIKAN TOMBOL ADMIN */
+        .controls button svg { width: 20px; height: 20px; fill: currentColor; }
+        
+        /* LOGIKA SEMBUNYIKAN TOMBOL ADMIN */
         .admin-only { display: none !important; }
-        /* Tampilkan jika body punya class edit-active */
-        body.edit-active .admin-only { display: inline-flex !important; animation: fadeIn 0.3s; }
+        body.edit-active .admin-only { display: inline-flex !important; animation: slideDown 0.3s ease; }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
         /* WARNA TOMBOL */
-        .btn-add { background: #27ae60; }
-        .btn-add:hover { background: #2ecc71; }
-        .btn-edit-mode { background: #f39c12; } 
+        .btn-edit-mode { background: #f39c12; }
+        .btn-source { background: rgba(255,255,255,0.2); backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.4) !important; }
         .btn-backup { background: #3498db; }
-        .btn-source { background: #34495e; border: 1px solid #7f8c8d !important; color: #bdc3c7 !important; }
-        .btn-source:hover { background: #fff; color: #2c3e50 !important; }
+        .btn-add { background: #27ae60; }
 
         /* CONTAINER KARTU */
         .container {
-            max-width: 1200px; margin: 40px auto; padding: 0 20px;
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 25px;
+            max-width: 1300px; margin: 50px auto; padding: 0 30px;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 30px;
         }
 
         .card {
-            background: var(--card-bg); border-radius: 15px; padding: 20px;
-            position: relative; transition: transform 0.3s, box-shadow 0.3s;
+            background: var(--card-bg); border-radius: 20px; padding: 25px;
+            position: relative; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             text-decoration: none; color: var(--text-main);
-            display: flex; flex-direction: column; height: 180px;
-            border: 1px solid transparent;
+            display: flex; flex-direction: column; height: 200px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            border-top: 5px solid var(--grad-start);
         }
-        .card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+        .card:hover { transform: translateY(-10px); box-shadow: 0 15px 30px rgba(0,0,0,0.12); }
         
-        .card-icon { font-size: 40px; margin-bottom: 10px; height: 50px; display: flex; align-items: center; }
-        .card-icon svg { width: 48px; height: 48px; fill: var(--text-main); }
-        .card-title { font-size: 18px; font-weight: bold; margin: 0 0 5px 0; }
-        .card-desc { font-size: 13px; color: #7f8c8d; line-height: 1.4; flex: 1; overflow: hidden; }
-        .card-link-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 1; cursor: pointer; }
+        .card-icon { height: 60px; margin-bottom: 15px; display: flex; align-items: center; }
+        .card-icon svg { width: 52px; height: 52px; fill: var(--grad-start); }
+        .card-title { font-size: 20px; font-weight: 800; margin: 0 0 8px 0; color: var(--grad-start); }
+        .card-desc { font-size: 14px; color: #64748b; line-height: 1.5; flex: 1; overflow: hidden; }
         
-        .gear-btn {
-            position: absolute; bottom: 15px; right: 15px;
-            background: #dfe6e9; width: 35px; height: 35px;
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            font-size: 18px; color: #2d3436; z-index: 2; 
-            transition: 0.3s; text-decoration: none; border: none; cursor: pointer;
-        }
-        .gear-btn:hover { background: var(--accent); color: white; transform: rotate(90deg); }
-
-        /* EDIT CARD CONTROLS */
-        .editor-controls { position: absolute; top: 10px; right: 10px; display: none; gap: 5px; z-index: 5; }
+        /* EDIT CARD UI */
+        .editor-controls { position: absolute; top: 15px; right: 15px; display: none; gap: 8px; }
         body.edit-active .editor-controls { display: flex; }
-        body.edit-active .card-link-overlay { pointer-events: none; }
-        body.edit-active .card { border: 2px dashed #f39c12; background: #fff; }
-        
-        .mini-btn { width: 25px; height: 25px; border-radius: 50%; border: none; cursor: pointer; color: white; font-size: 12px; }
-        .btn-del { background: #c0392b; } .btn-mod { background: #2980b9; } .btn-move { background: #7f8c8d; }
+        body.edit-active .card { outline: 2px dashed #f39c12; background: #fffdf9; }
+        .mini-btn { width: 30px; height: 30px; border-radius: 50%; border: none; cursor: pointer; color: white; display: flex; align-items: center; justify-content: center; }
+        .btn-del { background: #ef4444; } .btn-mod { background: #3b82f6; } .btn-move { background: #64748b; }
 
-        /* MODAL */
+        /* THEME PICKER (DI DALAM MODAL) */
+        .theme-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 10px; }
+        .theme-opt { 
+            height: 40px; border-radius: 8px; cursor: pointer; border: 3px solid transparent; 
+            transition: 0.2s; background: linear-gradient(135deg, var(--s), var(--e));
+        }
+        .theme-opt:hover { transform: scale(1.05); }
+        .theme-opt.active { border-color: #333; box-shadow: 0 0 10px rgba(0,0,0,0.2); }
+
+        /* MODAL SYSTEM */
         .modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7); z-index: 200; justify-content: center; align-items: center;
-            backdrop-filter: blur(3px);
+            background: rgba(15, 23, 42, 0.8); z-index: 200; justify-content: center; align-items: center;
+            backdrop-filter: blur(8px);
         }
         .modal-content {
-            background: white; padding: 25px; border-radius: 10px; width: 400px;
-            color: #333; box-shadow: 0 20px 50px rgba(0,0,0,0.5); animation: slideIn 0.3s ease;
+            background: white; padding: 30px; border-radius: 16px; width: 450px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
-        @keyframes slideIn { from {transform: translateY(-20px); opacity: 0;} to {transform: translateY(0); opacity: 1;} }
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 13px; }
-        .form-group input, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
-        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
-        .empty-state { grid-column: 1 / -1; text-align: center; color: #95a5a6; margin-top: 50px; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 700; color: #1e293b; }
+        .form-group input, .form-group textarea { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; box-sizing: border-box; font-size: 14px; }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 25px; }
 
         @media (max-width: 900px) {
-            .navbar { flex-direction: column; gap: 15px; padding-bottom: 20px; }
-            .brand span { font-size: 16px; margin-left: 8px; }
-            .brand img { height: 40px; }
-            .controls { flex-wrap: wrap; justify-content: center; }
-            .container { grid-template-columns: 1fr; }
+            .navbar { flex-direction: column; padding: 20px; text-align: center; }
+            .brand span { font-size: 24px; }
+            .controls { flex-wrap: wrap; justify-content: center; margin-top: 15px; }
         }
     </style>
 </head>
@@ -168,13 +153,13 @@
 
     <div class="navbar">
         <div class="brand" id="brandHeader" onclick="openHeaderModal()">
-            <img id="navLogo" src="QIRAATI.png" alt="Logo" onerror="this.src='https://via.placeholder.com/50?text=IMG'">
+            <img id="navLogo" src="QIRAATI.png" alt="Logo" onerror="this.src='https://via.placeholder.com/65?text=TPQ'">
             <span id="navTitle">DASHBOARD EBTAQ</span>
             <div class="header-edit-icon">✎</div>
         </div>
 
         <div class="controls">
-            <a href="https://github.com/korcabqiroatidemak/dashboardebtaq/blob/main/index.html" target="_blank" class="btn-link btn-source admin-only" title="Edit Source Code">
+            <a href="https://github.com/korcabqiroatidemak/dashboardebtaq/blob/main/index.html" target="_blank" class="btn-link btn-source admin-only">
                 <svg viewBox="0 0 24 24"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"></path></svg> Kode
             </a>
             
@@ -198,39 +183,34 @@
 
     <div class="container" id="cardContainer"></div>
 
-    <div class="modal" id="projectModal">
+    <div class="modal" id="headerModal">
         <div class="modal-content">
-            <h3 id="modalTitle" style="margin-top:0;">Tambah Proyek</h3>
-            <input type="hidden" id="editIndex"> 
-            <div class="form-group"><label>Judul Proyek</label><input type="text" id="inpTitle"></div>
-            <div class="form-group"><label>Deskripsi</label><textarea id="inpDesc" rows="2"></textarea></div>
-            <div class="form-group"><label>Ikon (Emoji/SVG)</label><input type="text" id="inpIcon" value="📂"></div>
-            <div class="form-group"><label>Link Output</label><input type="text" id="inpLink"></div>
-            <div class="form-group"><label>Link Edit (Opsional)</label><input type="text" id="inpEditLink"></div>
+            <h3 style="margin:0 0 20px 0; color:#1e293b; border-bottom:2px solid #f1f5f9; padding-bottom:10px;">Pengaturan Dashboard</h3>
+            <div class="form-group"><label>Judul Dashboard</label><input type="text" id="cfgTitle"></div>
+            <div class="form-group"><label>File Logo (e.g QIRAATI.png)</label><input type="text" id="cfgLogo"></div>
+            <div class="form-group">
+                <label>Pilih Tema Gradasi</label>
+                <div class="theme-grid" id="themeGrid"></div>
+            </div>
             <div class="modal-actions">
-                <button onclick="closeModal('projectModal')" style="background:#95a5a6; color:white; border:none; padding:8px 15px; border-radius:5px;">Batal</button>
-                <button onclick="saveProject()" style="background:#27ae60; color:white; border:none; padding:8px 15px; border-radius:5px;">Simpan</button>
+                <button onclick="closeModal('headerModal')" style="background:#64748b; color:white; border:none; padding:10px 20px; border-radius:8px;">Batal</button>
+                <button onclick="saveHeaderConfig()" style="background:#3b82f6; color:white; border:none; padding:10px 20px; border-radius:8px; font-weight:bold;">Simpan</button>
             </div>
         </div>
     </div>
 
-    <div class="modal" id="headerModal">
+    <div class="modal" id="projectModal">
         <div class="modal-content">
-            <h3 style="margin-top:0; border-bottom:1px solid #eee; padding-bottom:10px;">Pengaturan Dashboard</h3>
-            
-            <div class="form-group">
-                <label>Nama Dashboard (Judul)</label>
-                <input type="text" id="cfgTitle" placeholder="Contoh: BERANDA SEKOLAH">
-            </div>
-            <div class="form-group">
-                <label>Nama File Logo (Local / URL)</label>
-                <input type="text" id="cfgLogo" placeholder="Contoh: QIRAATI.png">
-                <div style="font-size:11px; color:#7f8c8d; margin-top:5px;">Pastikan file gambar berada di folder yang sama.</div>
-            </div>
-            
+            <h3 id="modalTitle" style="margin:0 0 20px 0;">Tambah Proyek</h3>
+            <input type="hidden" id="editIndex"> 
+            <div class="form-group"><label>Nama Proyek</label><input type="text" id="inpTitle"></div>
+            <div class="form-group"><label>Deskripsi</label><textarea id="inpDesc" rows="2"></textarea></div>
+            <div class="form-group"><label>Ikon (Emoji / SVG)</label><input type="text" id="inpIcon" value="📂"></div>
+            <div class="form-group"><label>Link File HTML</label><input type="text" id="inpLink"></div>
+            <div class="form-group"><label>Link Edit (Opsional)</label><input type="text" id="inpEditLink"></div>
             <div class="modal-actions">
-                <button onclick="closeModal('headerModal')" style="background:#95a5a6; color:white; border:none; padding:8px 15px; border-radius:5px;">Batal</button>
-                <button onclick="saveHeaderConfig()" style="background:#2980b9; color:white; border:none; padding:8px 15px; border-radius:5px;">Simpan Perubahan</button>
+                <button onclick="closeModal('projectModal')" style="background:#64748b; color:white; border:none; padding:10px 20px; border-radius:8px;">Batal</button>
+                <button onclick="saveProject()" style="background:#10b981; color:white; border:none; padding:10px 20px; border-radius:8px; font-weight:bold;">Simpan</button>
             </div>
         </div>
     </div>
@@ -238,133 +218,141 @@
     <input type="file" id="fileInput" style="display: none;" onchange="handleFileSelect(this)">
 
 <script>
-    // --- 1. INISIALISASI DATA & CONFIG ---
+    // --- 1. DATA & CONFIG ---
     let projects = JSON.parse(localStorage.getItem('myProjectsDB')) || [];
-    
-    // Default Config jika belum ada
     let config = JSON.parse(localStorage.getItem('dashboardConfig')) || {
         title: "DASHBOARD EBTAQ",
-        logo: "QIRAATI.png"
+        logo: "QIRAATI.png",
+        themeIdx: 0
     };
 
+    // 7 PRESET GRADASI
+    const themes = [
+        { s: "#047857", e: "#10b981" }, // Emerald
+        { s: "#1e3a8a", e: "#3b82f6" }, // Midnight Blue
+        { s: "#9a3412", e: "#f97316" }, // Terracotta
+        { s: "#581c87", e: "#a855f7" }, // Royal Purple
+        { s: "#0f766e", e: "#14b8a6" }, // Ocean Teal
+        { s: "#be123c", e: "#fb7185" }, // Rose Red
+        { s: "#334155", e: "#94a3b8" }  // Slate Slate
+    ];
+
     let isEditMode = false;
+    let tempThemeIdx = config.themeIdx;
 
-    // --- 2. RENDER FUNGSI ---
+    // --- 2. RENDERERS ---
     function render() {
-        renderHeader(); // Render Logo & Judul
-        renderCards();  // Render Kartu Proyek
-    }
-
-    function renderHeader() {
+        applyTheme(config.themeIdx);
         document.getElementById('navTitle').innerText = config.title;
         document.getElementById('navLogo').src = config.logo;
         
-        // Isi form config modal dengan data saat ini
-        document.getElementById('cfgTitle').value = config.title;
-        document.getElementById('cfgLogo').value = config.logo;
-    }
-
-    function renderCards() {
         const container = document.getElementById('cardContainer');
-        container.innerHTML = ''; 
-        if (projects.length === 0) {
-            container.innerHTML = `<div class="empty-state"><h3>Dashboard kosong. Aktifkan "Edit Mode" untuk menambah proyek.</h3></div>`;
-            return;
-        }
-        projects.forEach((p, index) => {
-            const editUrl = p.editLink ? p.editLink : ('view-source:' + p.link);
+        container.innerHTML = projects.length ? '' : `<div class="empty-state"><h3>Dashboard Siap. Klik Edit Mode untuk mengelola.</h3></div>`;
+        
+        projects.forEach((p, i) => {
             const card = document.createElement('div');
-            card.className = `card`; // class edit-active diatur via body
+            card.className = 'card';
             card.innerHTML = `
                 <div class="editor-controls">
-                    <button class="mini-btn btn-move" onclick="moveProject(${index}, -1)">◀</button>
-                    <button class="mini-btn btn-move" onclick="moveProject(${index}, 1)">▶</button>
-                    <button class="mini-btn btn-mod" onclick="editProject(${index})">✎</button>
-                    <button class="mini-btn btn-del" onclick="deleteProject(${index})">✖</button>
+                    <button class="mini-btn btn-move" onclick="moveProject(${i},-1)">▲</button>
+                    <button class="mini-btn btn-move" onclick="moveProject(${i},1)">▼</button>
+                    <button class="mini-btn btn-mod" onclick="editProject(${i})">✎</button>
+                    <button class="mini-btn btn-del" onclick="deleteProject(${i})">✖</button>
                 </div>
                 <div class="card-icon">${p.icon}</div>
                 <div class="card-title">${p.title}</div>
                 <div class="card-desc">${p.desc}</div>
-                <a href="${p.link}" class="card-link-overlay" target="_blank"></a>
-                <a href="${editUrl}" target="_blank" class="gear-btn"><svg style="width:18px; height:18px; fill:currentColor;" viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.04.17 0 .36.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.04-.22 0-.41-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"></path></svg></a>
+                <a href="${p.link}" target="_blank" class="card-link-overlay"></a>
             `;
             container.appendChild(card);
         });
     }
 
-    // --- 3. LOGIKA EDIT HEADER (BARU) ---
+    function applyTheme(idx) {
+        const t = themes[idx];
+        document.documentElement.style.setProperty('--grad-start', t.s);
+        document.documentElement.style.setProperty('--grad-end', t.e);
+    }
+
+    // --- 3. LOGIKA ADMIN & HEADER ---
+    function toggleEditMode() {
+        isEditMode = !isEditMode;
+        document.body.classList.toggle('edit-active', isEditMode);
+        document.getElementById('btnMode').innerHTML = isEditMode ? 
+            `<svg viewBox="0 0 24 24"><path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"></path></svg> Edit: ON` :
+            `<svg viewBox="0 0 24 24"><path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"></path></svg> Edit: OFF`;
+    }
+
     function openHeaderModal() {
-        if(!isEditMode) return; // Hanya bisa diklik saat Edit Mode ON
+        if(!isEditMode) return;
+        document.getElementById('cfgTitle').value = config.title;
+        document.getElementById('cfgLogo').value = config.logo;
+        tempThemeIdx = config.themeIdx;
+        renderThemeOptions();
         document.getElementById('headerModal').style.display = 'flex';
     }
 
+    function renderThemeOptions() {
+        const grid = document.getElementById('themeGrid');
+        grid.innerHTML = '';
+        themes.forEach((t, i) => {
+            const opt = document.createElement('div');
+            opt.className = `theme-opt ${i === tempThemeIdx ? 'active' : ''}`;
+            opt.style.setProperty('--s', t.s);
+            opt.style.setProperty('--e', t.e);
+            opt.onclick = () => {
+                tempThemeIdx = i;
+                applyTheme(i); // Live Preview
+                renderThemeOptions();
+            };
+            grid.appendChild(opt);
+        });
+    }
+
     function saveHeaderConfig() {
-        const newTitle = document.getElementById('cfgTitle').value;
-        const newLogo = document.getElementById('cfgLogo').value;
-        if(newTitle) {
-            config.title = newTitle;
-            config.logo = newLogo;
-            localStorage.setItem('dashboardConfig', JSON.stringify(config));
-            renderHeader();
-            closeModal('headerModal');
-        }
+        config.title = document.getElementById('cfgTitle').value || config.title;
+        config.logo = document.getElementById('cfgLogo').value || config.logo;
+        config.themeIdx = tempThemeIdx;
+        localStorage.setItem('dashboardConfig', JSON.stringify(config));
+        render();
+        closeModal('headerModal');
     }
 
-    // --- 4. TOGGLE EDIT MODE ---
-    function toggleEditMode() {
-        isEditMode = !isEditMode;
-        const btn = document.getElementById('btnMode');
-        
-        if(isEditMode) {
-            document.body.classList.add('edit-active'); // Memicu CSS State
-            btn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"></path></svg> Edit: ON`;
-            btn.style.background = "#e74c3c";
-        } else {
-            document.body.classList.remove('edit-active'); // Reset CSS State
-            btn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"></path></svg> Edit: OFF`;
-            btn.style.background = "#f39c12";
-        }
-    }
-
-    // --- 5. LOGIKA CRUD PROYEK (STANDARD) ---
+    // --- 4. CRUD PROYEK ---
     function openModal() {
-        document.getElementById('editIndex').value = '-1'; 
-        document.getElementById('modalTitle').innerText = 'Tambah Proyek';
-        document.getElementById('inpTitle').value = '';
-        document.getElementById('inpDesc').value = '';
-        document.getElementById('inpIcon').value = '📂';
-        document.getElementById('inpLink').value = '';
-        document.getElementById('inpEditLink').value = '';
+        document.getElementById('editIndex').value = '-1';
+        ['inpTitle','inpDesc','inpLink','inpEditLink'].forEach(id => document.getElementById(id).value = '');
         document.getElementById('projectModal').style.display = 'flex';
     }
 
-    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+    function closeModal(id) { 
+        document.getElementById(id).style.display = 'none'; 
+        if(id === 'headerModal') applyTheme(config.themeIdx); // Revert preview jika batal
+    }
 
     function saveProject() {
-        const title = document.getElementById('inpTitle').value;
-        const desc = document.getElementById('inpDesc').value;
-        const icon = document.getElementById('inpIcon').value;
-        const link = document.getElementById('inpLink').value;
-        const editLink = document.getElementById('inpEditLink').value;
-        const index = parseInt(document.getElementById('editIndex').value);
+        const data = {
+            title: document.getElementById('inpTitle').value,
+            desc: document.getElementById('inpDesc').value,
+            icon: document.getElementById('inpIcon').value,
+            link: document.getElementById('inpLink').value,
+            editLink: document.getElementById('inpEditLink').value
+        };
+        const idx = parseInt(document.getElementById('editIndex').value);
+        if(!data.title || !data.link) return alert("Data belum lengkap!");
+        
+        if(idx === -1) projects.push(data);
+        else projects[idx] = data;
 
-        if(!title || !link) return alert("Wajib diisi!");
-        const data = { title, desc, icon, link, editLink };
-
-        if (index === -1) projects.push(data);
-        else projects[index] = data;
-
-        saveToLocal(); closeModal('projectModal'); renderCards();
+        localStorage.setItem('myProjectsDB', JSON.stringify(projects));
+        render(); closeModal('projectModal');
     }
 
-    function deleteProject(index) {
-        if(confirm("Hapus proyek ini?")) { projects.splice(index, 1); saveToLocal(); renderCards(); }
-    }
-
-    function editProject(index) {
-        const p = projects[index];
-        document.getElementById('editIndex').value = index;
-        document.getElementById('modalTitle').innerText = 'Edit Proyek';
+    function deleteProject(i) { if(confirm("Hapus?")) { projects.splice(i,1); localStorage.setItem('myProjectsDB', JSON.stringify(projects)); render(); } }
+    
+    function editProject(i) {
+        const p = projects[i];
+        document.getElementById('editIndex').value = i;
         document.getElementById('inpTitle').value = p.title;
         document.getElementById('inpDesc').value = p.desc;
         document.getElementById('inpIcon').value = p.icon;
@@ -373,53 +361,41 @@
         document.getElementById('projectModal').style.display = 'flex';
     }
 
-    function moveProject(index, direction) {
-        const newIndex = index + direction;
-        if (newIndex < 0 || newIndex >= projects.length) return;
-        [projects[index], projects[newIndex]] = [projects[newIndex], projects[index]];
-        saveToLocal(); renderCards();
+    function moveProject(i, d) {
+        const ni = i + d;
+        if(ni >= 0 && ni < projects.length) {
+            [projects[i], projects[ni]] = [projects[ni], projects[i]];
+            localStorage.setItem('myProjectsDB', JSON.stringify(projects)); render();
+        }
     }
 
-    function saveToLocal() { localStorage.setItem('myProjectsDB', JSON.stringify(projects)); }
-
-    // --- 6. BACKUP RESTORE (TERMASUK CONFIG) ---
+    // --- 5. BACKUP & RESTORE ---
     function backupData() {
-        // Backup Proyek DAN Config sekaligus
-        const bundle = { projects: projects, config: config };
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(bundle));
-        const dl = document.createElement('a');
-        dl.setAttribute("href", dataStr);
-        dl.setAttribute("download", "dashboard_backup.json");
-        document.body.appendChild(dl); dl.click(); dl.remove();
+        const bundle = { projects, config };
+        const blob = new Blob([JSON.stringify(bundle)], {type: 'application/json'});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `backup_ebtaq_${new Date().toLocaleDateString()}.json`;
+        a.click();
     }
 
     function restoreData() { document.getElementById('fileInput').click(); }
 
     function handleFileSelect(input) {
-        const file = input.files[0];
-        if (!file) return;
         const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const json = JSON.parse(e.target.result);
-                // Support format lama (Array only) dan format baru (Bundle object)
-                if (Array.isArray(json)) {
-                    projects = json; // Format lama
-                } else if (json.projects && json.config) {
-                    projects = json.projects; // Format baru
-                    config = json.config;
-                    localStorage.setItem('dashboardConfig', JSON.stringify(config));
-                }
-                saveToLocal();
-                render();
-                alert("Restorasi Berhasil!");
-            } catch (err) { alert("File rusak!"); }
+        reader.onload = e => {
+            const data = JSON.parse(e.target.result);
+            if(data.projects && data.config) {
+                projects = data.projects; config = data.config;
+                localStorage.setItem('myProjectsDB', JSON.stringify(projects));
+                localStorage.setItem('dashboardConfig', JSON.stringify(config));
+                render(); alert("Restorasi Berhasil!");
+            }
         };
-        reader.readAsText(file);
+        reader.readAsText(input.files[0]);
     }
 
     render();
 </script>
-
 </body>
 </html>
