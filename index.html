@@ -22,14 +22,14 @@
         /* HEADER */
         .navbar {
             background: rgba(0,0,0,0.25);
-            padding: 10px 30px; /* Padding sedikit diperkecil agar logo pas */
+            padding: 10px 30px; 
             display: flex; justify-content: space-between; align-items: center;
             backdrop-filter: blur(10px);
             position: sticky; top: 0; z-index: 100;
             border-bottom: 1px solid rgba(255,255,255,0.1);
         }
         
-        /* LOGO IMAGE STYLE */
+        /* LOGO IMAGE STYLE (LOKAL) */
         .brand { 
             display: flex; align-items: center; 
         }
@@ -42,18 +42,25 @@
         .brand img:hover { transform: scale(1.05); }
 
         .controls { display: flex; gap: 8px; align-items: center; }
-        .controls button {
+        .controls button, .controls a.btn-link {
             padding: 8px 15px; border: none; border-radius: 20px;
             font-weight: bold; cursor: pointer;
             transition: 0.3s; font-size: 13px;
+            text-decoration: none; /* Untuk anchor tag */
+            display: inline-block;
         }
         
         .btn-add { background: #27ae60; color: white; }
         .btn-add:hover { background: #2ecc71; }
         .btn-edit-mode { background: #f39c12; color: white; }
         .btn-backup { background: #3498db; color: white; }
-        /* Tombol Edit Source Dashboard */
-        .btn-source { background: #34495e; color: #bdc3c7; border: 1px solid #7f8c8d !important; }
+        
+        /* Tombol Edit Source (Link GitHub) */
+        .btn-source { 
+            background: #34495e; 
+            color: #bdc3c7; 
+            border: 1px solid #7f8c8d !important; 
+        }
         .btn-source:hover { background: #fff; color: #2c3e50; }
 
         /* GRID CONTAINER */
@@ -149,10 +156,12 @@
 
     <div class="navbar">
         <div class="brand">
-            <img src="https://drive.google.com/uc?export=view&id=1BiriYrYzXLlXI-QTbyQEioOw2FnmFG2n" alt="Logo EBTAQ">
+            <img src="QIRAATI.png" alt="Logo EBTAQ" onerror="this.style.display='none'; this.parentNode.innerHTML='🚀 BERANDA EBTAQ'">
         </div>
         <div class="controls">
-            <button class="btn-source" onclick="viewDashboardSource()" title="Lihat/Edit HTML Dashboard Ini">&lt;/&gt; Kode</button>
+            <a href="https://github.com/korcabqiroatidemak/dashboardebtaq/blob/main/index.html" target="_blank" class="btn-link btn-source" title="Edit Source Code di GitHub">
+                &lt;/&gt; Kode
+            </a>
             
             <button class="btn-backup" onclick="backupData()" title="Download Backup JSON">💾 Backup</button>
             <button class="btn-backup" onclick="restoreData()" title="Upload Backup JSON">📂 Restore</button>
@@ -186,8 +195,8 @@
                 <input type="text" id="inpLink" placeholder="folder/file.html">
             </div>
             <div class="form-group">
-                <label>Link Edit (Source Code / Editor)</label>
-                <input type="text" id="inpEditLink" placeholder="view-source:folder/file.html">
+                <label>Link Edit (Opsional - Jika ada file lain)</label>
+                <input type="text" id="inpEditLink" placeholder="Biarkan kosong jika sama">
             </div>
             
             <div class="modal-actions">
@@ -215,7 +224,8 @@
         }
 
         projects.forEach((p, index) => {
-            const editUrl = p.editLink ? p.editLink : '#';
+            // Logika Link Edit: Jika user kosongkan, arahkan ke view-source file outputnya
+            const editUrl = p.editLink ? p.editLink : ('view-source:' + p.link);
             const editTarget = '_blank';
 
             const card = document.createElement('div');
@@ -234,20 +244,12 @@
 
                 <a href="${p.link}" class="card-link-overlay" target="_blank" title="Buka Aplikasi"></a>
                 
-                <a href="${editUrl}" target="${editTarget}" class="gear-btn" title="Edit Script / Setting">
+                <a href="${editUrl}" target="${editTarget}" class="gear-btn" title="Lihat Kode / Edit">
                     ⚙
                 </a>
             `;
             container.appendChild(card);
         });
-    }
-
-    // --- 3. FITUR UTAMA DASHBOARD ---
-    
-    // Membuka Source Code Dashboard Sendiri
-    function viewDashboardSource() {
-        // Membuka view-source dari halaman saat ini
-        window.open('view-source:' + window.location.href, '_blank');
     }
 
     // CRUD PROYEK
