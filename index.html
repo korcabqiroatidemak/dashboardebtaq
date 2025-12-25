@@ -29,12 +29,9 @@
             border-bottom: 1px solid rgba(255,255,255,0.1);
         }
         
-        /* LOGO IMAGE STYLE (LOKAL) */
-        .brand { 
-            display: flex; align-items: center; 
-        }
+        .brand { display: flex; align-items: center; }
         .brand img {
-            height: 55px; /* Tinggi logo disesuaikan */
+            height: 55px; 
             width: auto;
             filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
             transition: transform 0.3s;
@@ -42,26 +39,33 @@
         .brand img:hover { transform: scale(1.05); }
 
         .controls { display: flex; gap: 8px; align-items: center; }
+        
+        /* TOMBOL NAVIGASI UPDATE (Support SVG) */
         .controls button, .controls a.btn-link {
-            padding: 8px 15px; border: none; border-radius: 20px;
-            font-weight: bold; cursor: pointer;
-            transition: 0.3s; font-size: 13px;
-            text-decoration: none; /* Untuk anchor tag */
-            display: inline-block;
+            padding: 8px 15px; border: none; border-radius: 6px; /* Radius dikurangi biar lebih kotak modern */
+            font-weight: 600; cursor: pointer;
+            transition: 0.2s; font-size: 13px;
+            text-decoration: none; 
+            display: inline-flex; align-items: center; gap: 8px; /* Jarak ikon ke teks */
+            color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
         
-        .btn-add { background: #27ae60; color: white; }
+        .controls button svg, .controls a svg {
+            width: 18px; height: 18px; fill: currentColor; /* SVG mengikuti warna teks */
+        }
+        
+        .controls button:hover { transform: translateY(-2px); }
+        .controls button:active { transform: translateY(0); }
+
+        .btn-add { background: #27ae60; }
         .btn-add:hover { background: #2ecc71; }
-        .btn-edit-mode { background: #f39c12; color: white; }
-        .btn-backup { background: #3498db; color: white; }
-        
-        /* Tombol Edit Source (Link GitHub) */
-        .btn-source { 
-            background: #34495e; 
-            color: #bdc3c7; 
-            border: 1px solid #7f8c8d !important; 
-        }
-        .btn-source:hover { background: #fff; color: #2c3e50; }
+        .btn-edit-mode { background: #f39c12; }
+        .btn-edit-mode:hover { background: #f1c40f; }
+        .btn-backup { background: #3498db; }
+        .btn-backup:hover { background: #5dade2; }
+        .btn-source { background: #34495e; border: 1px solid #7f8c8d !important; color: #ecf0f1 !important; }
+        .btn-source:hover { background: #fff; color: #2c3e50 !important; }
 
         /* GRID CONTAINER */
         .container {
@@ -90,7 +94,14 @@
             border-color: rgba(0,0,0,0.1);
         }
         
-        .card-icon { font-size: 40px; margin-bottom: 10px; }
+        /* CSS KHUSUS AGAR SVG DI KARTU RAPI */
+        .card-icon { 
+            font-size: 40px; margin-bottom: 10px; height: 50px; display: flex; align-items: center;
+        }
+        .card-icon svg {
+            width: 48px; height: 48px; fill: var(--text-main); /* Warna ikon mengikuti tema */
+        }
+
         .card-title { font-size: 18px; font-weight: bold; margin: 0 0 5px 0; }
         .card-desc { font-size: 13px; color: #7f8c8d; line-height: 1.4; flex: 1; overflow: hidden; }
 
@@ -99,7 +110,6 @@
             z-index: 1; cursor: pointer;
         }
 
-        /* GEAR ICON (Edit Link) */
         .gear-btn {
             position: absolute; bottom: 15px; right: 15px;
             background: #dfe6e9; width: 35px; height: 35px;
@@ -145,7 +155,7 @@
         
         .empty-state { grid-column: 1 / -1; text-align: center; color: #95a5a6; margin-top: 50px; }
 
-        @media (max-width: 800px) {
+        @media (max-width: 900px) {
             .navbar { flex-direction: column; gap: 15px; padding-bottom: 20px; }
             .controls { flex-wrap: wrap; justify-content: center; }
             .container { grid-template-columns: 1fr; }
@@ -159,14 +169,30 @@
             <img src="QIRAATI.png" alt="Logo EBTAQ" onerror="this.style.display='none'; this.parentNode.innerHTML='🚀 BERANDA EBTAQ'">
         </div>
         <div class="controls">
-            <a href="https://github.com/korcabqiroatidemak/dashboardebtaq/blob/main/index.html" target="_blank" class="btn-link btn-source" title="Edit Source Code di GitHub">
-                &lt;/&gt; Kode
+            <a href="https://github.com/korcabqiroatidemak/dashboardebtaq/blob/main/index.html" target="_blank" class="btn-link btn-source" title="Edit Source Code">
+                <svg viewBox="0 0 24 24"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"></path></svg>
+                Kode
             </a>
             
-            <button class="btn-backup" onclick="backupData()" title="Download Backup JSON">💾 Backup</button>
-            <button class="btn-backup" onclick="restoreData()" title="Upload Backup JSON">📂 Restore</button>
-            <button class="btn-edit-mode" onclick="toggleEditMode()" id="btnMode">🔧 Edit Mode: OFF</button>
-            <button class="btn-add" onclick="openModal()">+ Tambah Proyek</button>
+            <button class="btn-backup" onclick="backupData()" title="Download Backup JSON">
+                <svg viewBox="0 0 24 24"><path d="M19 12v7H5v-7H3v7c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-7h-2zm-6 .67l2.59-2.58L17 11.5l-5 5-5-5 1.41-1.41L11 12.67V3h2v9.67z"></path></svg>
+                Backup
+            </button>
+
+            <button class="btn-backup" onclick="restoreData()" title="Upload Backup JSON">
+                <svg viewBox="0 0 24 24"><path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10zm-7.79-3.11l-2.76 2.76L10 17l4-4-4-4-.55.55 2.76 2.76H6.11v.79h6.1z"></path></svg>
+                Restore
+            </button>
+
+            <button class="btn-edit-mode" onclick="toggleEditMode()" id="btnMode">
+                <svg viewBox="0 0 24 24"><path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"></path></svg>
+                Edit: OFF
+            </button>
+
+            <button class="btn-add" onclick="openModal()">
+                <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"></path></svg>
+                Proyek
+            </button>
         </div>
     </div>
 
@@ -187,8 +213,9 @@
                 <textarea id="inpDesc" rows="2" placeholder="Keterangan fungsi aplikasi..."></textarea>
             </div>
             <div class="form-group">
-                <label>Ikon (Emoji atau FontAwesome)</label>
-                <input type="text" id="inpIcon" placeholder="Contoh: 🎓 atau 📝" value="📂">
+                <label>Ikon (Emoji atau SVG Code)</label>
+                <input type="text" id="inpIcon" placeholder="Paste kode <svg>...</svg> di sini atau pakai Emoji 📂" value="📂">
+                <div style="font-size:10px; color:#666; margin-top:3px;">*Bisa paste kode SVG penuh seperti yang Anda punya.</div>
             </div>
             <div class="form-group">
                 <label>Link Output (HTML File)</label>
@@ -219,12 +246,12 @@
         container.innerHTML = ''; 
 
         if (projects.length === 0) {
-            container.innerHTML = `<div class="empty-state"><h3>Belum ada proyek. Klik "+ Tambah Proyek" untuk memulai.</h3></div>`;
+            container.innerHTML = `<div class="empty-state"><h3>Belum ada proyek. Klik "+ Proyek" untuk memulai.</h3></div>`;
             return;
         }
 
         projects.forEach((p, index) => {
-            // Logika Link Edit: Jika user kosongkan, arahkan ke view-source file outputnya
+            // Logika Link Edit
             const editUrl = p.editLink ? p.editLink : ('view-source:' + p.link);
             const editTarget = '_blank';
 
@@ -239,26 +266,27 @@
                 </div>
 
                 <div class="card-icon">${p.icon}</div>
+                
                 <div class="card-title">${p.title}</div>
                 <div class="card-desc">${p.desc}</div>
 
                 <a href="${p.link}" class="card-link-overlay" target="_blank" title="Buka Aplikasi"></a>
                 
                 <a href="${editUrl}" target="${editTarget}" class="gear-btn" title="Lihat Kode / Edit">
-                    ⚙
+                    <svg style="width:18px; height:18px; fill:currentColor;" viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.04.17 0 .36.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.04-.22 0-.41-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"></path></svg>
                 </a>
             `;
             container.appendChild(card);
         });
     }
 
-    // CRUD PROYEK
+    // CRUD
     function openModal() {
         document.getElementById('editIndex').value = '-1'; 
         document.getElementById('modalTitle').innerText = 'Tambah Proyek Baru';
         document.getElementById('inpTitle').value = '';
         document.getElementById('inpDesc').value = '';
-        document.getElementById('inpIcon').value = '📂';
+        document.getElementById('inpIcon').value = '📂'; // Default emoji
         document.getElementById('inpLink').value = '';
         document.getElementById('inpEditLink').value = '';
         document.getElementById('projectModal').style.display = 'flex';
@@ -329,11 +357,12 @@
     function toggleEditMode() {
         isEditMode = !isEditMode;
         const btn = document.getElementById('btnMode');
+        // Update teks dan ikon tombol Edit
         if(isEditMode) {
-            btn.innerHTML = "🔧 Edit Mode: ON";
+            btn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"></path></svg> Edit: ON`;
             btn.style.background = "#e74c3c";
         } else {
-            btn.innerHTML = "🔧 Edit Mode: OFF";
+            btn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"></path></svg> Edit: OFF`;
             btn.style.background = "#f39c12";
         }
         render();
