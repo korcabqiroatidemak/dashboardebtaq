@@ -21,22 +21,40 @@
 
         /* HEADER */
         .navbar {
-            background: rgba(0,0,0,0.2);
-            padding: 15px 30px;
+            background: rgba(0,0,0,0.25);
+            padding: 10px 30px; /* Padding sedikit diperkecil agar logo pas */
             display: flex; justify-content: space-between; align-items: center;
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(10px);
             position: sticky; top: 0; z-index: 100;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
         }
-        .brand { font-size: 24px; font-weight: bold; letter-spacing: 1px; display: flex; align-items: center; gap: 10px; }
+        
+        /* LOGO IMAGE STYLE */
+        .brand { 
+            display: flex; align-items: center; 
+        }
+        .brand img {
+            height: 55px; /* Tinggi logo disesuaikan */
+            width: auto;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+            transition: transform 0.3s;
+        }
+        .brand img:hover { transform: scale(1.05); }
+
+        .controls { display: flex; gap: 8px; align-items: center; }
         .controls button {
             padding: 8px 15px; border: none; border-radius: 20px;
-            font-weight: bold; cursor: pointer; margin-left: 10px;
-            transition: 0.3s;
+            font-weight: bold; cursor: pointer;
+            transition: 0.3s; font-size: 13px;
         }
+        
         .btn-add { background: #27ae60; color: white; }
         .btn-add:hover { background: #2ecc71; }
         .btn-edit-mode { background: #f39c12; color: white; }
         .btn-backup { background: #3498db; color: white; }
+        /* Tombol Edit Source Dashboard */
+        .btn-source { background: #34495e; color: #bdc3c7; border: 1px solid #7f8c8d !important; }
+        .btn-source:hover { background: #fff; color: #2c3e50; }
 
         /* GRID CONTAINER */
         .container {
@@ -56,19 +74,19 @@
             text-decoration: none;
             color: var(--text-main);
             display: flex; flex-direction: column;
-            height: 180px; /* Tinggi tetap agar rapi */
+            height: 180px;
+            border: 1px solid transparent;
         }
         .card:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            border-color: rgba(0,0,0,0.1);
         }
         
-        /* Konten Kartu */
         .card-icon { font-size: 40px; margin-bottom: 10px; }
         .card-title { font-size: 18px; font-weight: bold; margin: 0 0 5px 0; }
         .card-desc { font-size: 13px; color: #7f8c8d; line-height: 1.4; flex: 1; overflow: hidden; }
 
-        /* Link Utama (Klik seluruh kartu) */
         .card-link-overlay {
             position: absolute; top: 0; left: 0; right: 0; bottom: 0;
             z-index: 1; cursor: pointer;
@@ -79,19 +97,19 @@
             position: absolute; bottom: 15px; right: 15px;
             background: #dfe6e9; width: 35px; height: 35px;
             border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            font-size: 18px; color: #2d3436; z-index: 2; /* Di atas overlay */
+            font-size: 18px; color: #2d3436; z-index: 2; 
             transition: 0.3s; text-decoration: none; border: none; cursor: pointer;
         }
         .gear-btn:hover { background: var(--accent); color: white; transform: rotate(90deg); }
 
-        /* EDIT MODE CONTROLS (Hanya muncul saat Edit Mode ON) */
+        /* EDIT MODE CONTROLS */
         .editor-controls {
             position: absolute; top: 10px; right: 10px;
             display: none; gap: 5px; z-index: 5;
         }
         .edit-active .editor-controls { display: flex; }
-        .edit-active .card-link-overlay { pointer-events: none; } /* Matikan link saat edit */
-        .edit-active .card { border: 2px dashed #f39c12; }
+        .edit-active .card-link-overlay { pointer-events: none; }
+        .edit-active .card { border: 2px dashed #f39c12; background: #fff; }
         
         .mini-btn { width: 25px; height: 25px; border-radius: 50%; border: none; cursor: pointer; color: white; font-size: 12px; }
         .btn-del { background: #c0392b; }
@@ -102,23 +120,27 @@
         .modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.7); z-index: 200; justify-content: center; align-items: center;
+            backdrop-filter: blur(3px);
         }
         .modal-content {
             background: white; padding: 25px; border-radius: 10px; width: 400px;
-            color: #333;
+            color: #333; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            animation: slideIn 0.3s ease;
         }
+        @keyframes slideIn { from {transform: translateY(-20px); opacity: 0;} to {transform: translateY(0); opacity: 1;} }
+
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 13px; }
         .form-group input, .form-group textarea {
-            width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box;
+            width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; font-family: inherit;
         }
         .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
         
-        /* Empty State */
         .empty-state { grid-column: 1 / -1; text-align: center; color: #95a5a6; margin-top: 50px; }
 
-        @media (max-width: 600px) {
-            .navbar { flex-direction: column; gap: 10px; }
+        @media (max-width: 800px) {
+            .navbar { flex-direction: column; gap: 15px; padding-bottom: 20px; }
+            .controls { flex-wrap: wrap; justify-content: center; }
             .container { grid-template-columns: 1fr; }
         }
     </style>
@@ -126,8 +148,12 @@
 <body>
 
     <div class="navbar">
-        <div class="brand">🚀 BERANDA EBTAQ</div>
+        <div class="brand">
+            <img src="https://drive.google.com/uc?export=view&id=1BiriYrYzXLlXI-QTbyQEioOw2FnmFG2n" alt="Logo EBTAQ">
+        </div>
         <div class="controls">
+            <button class="btn-source" onclick="viewDashboardSource()" title="Lihat/Edit HTML Dashboard Ini">&lt;/&gt; Kode</button>
+            
             <button class="btn-backup" onclick="backupData()" title="Download Backup JSON">💾 Backup</button>
             <button class="btn-backup" onclick="restoreData()" title="Upload Backup JSON">📂 Restore</button>
             <button class="btn-edit-mode" onclick="toggleEditMode()" id="btnMode">🔧 Edit Mode: OFF</button>
@@ -140,8 +166,10 @@
 
     <div class="modal" id="projectModal">
         <div class="modal-content">
-            <h3 id="modalTitle">Tambah Proyek Baru</h3>
-            <input type="hidden" id="editIndex"> <div class="form-group">
+            <h3 id="modalTitle" style="margin-top:0;">Tambah Proyek Baru</h3>
+            <input type="hidden" id="editIndex"> 
+            
+            <div class="form-group">
                 <label>Judul Proyek</label>
                 <input type="text" id="inpTitle" placeholder="Contoh: Cetak Ijazah v1">
             </div>
@@ -173,14 +201,13 @@
 
 <script>
     // --- 1. INISIALISASI DATA ---
-    // Cek apakah ada data di LocalStorage, jika tidak, pakai data awal kosong
     let projects = JSON.parse(localStorage.getItem('myProjectsDB')) || [];
     let isEditMode = false;
 
     // --- 2. FUNGSI RENDER (MENAMPILKAN KARTU) ---
     function render() {
         const container = document.getElementById('cardContainer');
-        container.innerHTML = ''; // Bersihkan kontainer
+        container.innerHTML = ''; 
 
         if (projects.length === 0) {
             container.innerHTML = `<div class="empty-state"><h3>Belum ada proyek. Klik "+ Tambah Proyek" untuk memulai.</h3></div>`;
@@ -188,9 +215,8 @@
         }
 
         projects.forEach((p, index) => {
-            // Cek apakah link edit ada isinya, kalau kosong arahkan ke link biasa
             const editUrl = p.editLink ? p.editLink : '#';
-            const editTarget = p.editLink ? '_blank' : '';
+            const editTarget = '_blank';
 
             const card = document.createElement('div');
             card.className = `card ${isEditMode ? 'edit-active' : ''}`;
@@ -216,18 +242,23 @@
         });
     }
 
-    // --- 3. LOGIKA CRUD (CREATE, READ, UPDATE, DELETE) ---
+    // --- 3. FITUR UTAMA DASHBOARD ---
+    
+    // Membuka Source Code Dashboard Sendiri
+    function viewDashboardSource() {
+        // Membuka view-source dari halaman saat ini
+        window.open('view-source:' + window.location.href, '_blank');
+    }
 
+    // CRUD PROYEK
     function openModal() {
-        document.getElementById('editIndex').value = '-1'; // -1 artinya mode tambah baru
+        document.getElementById('editIndex').value = '-1'; 
         document.getElementById('modalTitle').innerText = 'Tambah Proyek Baru';
-        // Reset form
         document.getElementById('inpTitle').value = '';
         document.getElementById('inpDesc').value = '';
         document.getElementById('inpIcon').value = '📂';
         document.getElementById('inpLink').value = '';
         document.getElementById('inpEditLink').value = '';
-        
         document.getElementById('projectModal').style.display = 'flex';
     }
 
@@ -248,10 +279,8 @@
         const data = { title, desc, icon, link, editLink };
 
         if (index === -1) {
-            // Tambah Baru
             projects.push(data);
         } else {
-            // Update Existing
             projects[index] = data;
         }
 
@@ -272,32 +301,25 @@
         const p = projects[index];
         document.getElementById('editIndex').value = index;
         document.getElementById('modalTitle').innerText = 'Edit Data Proyek';
-        
         document.getElementById('inpTitle').value = p.title;
         document.getElementById('inpDesc').value = p.desc;
         document.getElementById('inpIcon').value = p.icon;
         document.getElementById('inpLink').value = p.link;
         document.getElementById('inpEditLink').value = p.editLink;
-
         document.getElementById('projectModal').style.display = 'flex';
     }
 
-    // --- 4. FITUR REORDER (GESER URUTAN) ---
     function moveProject(index, direction) {
         const newIndex = index + direction;
-        // Cek batas array
         if (newIndex < 0 || newIndex >= projects.length) return;
-        
-        // Swap elemen array
         const temp = projects[index];
         projects[index] = projects[newIndex];
         projects[newIndex] = temp;
-
         saveToLocal();
         render();
     }
 
-    // --- 5. SYSTEM & STORAGE ---
+    // SYSTEM
     function saveToLocal() {
         localStorage.setItem('myProjectsDB', JSON.stringify(projects));
     }
@@ -315,7 +337,7 @@
         render();
     }
 
-    // --- 6. BACKUP & RESTORE (JSON FILE) ---
+    // BACKUP RESTORE
     function backupData() {
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(projects));
         const downloadAnchorNode = document.createElement('a');
@@ -352,7 +374,7 @@
         reader.readAsText(file);
     }
 
-    // Jalankan render pertama kali
+    // Start
     render();
 
 </script>
