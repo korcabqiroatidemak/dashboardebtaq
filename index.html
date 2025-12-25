@@ -29,30 +29,43 @@
             border-bottom: 1px solid rgba(255,255,255,0.1);
         }
         
-        .brand { display: flex; align-items: center; }
+        /* LOGO & BRAND STYLE */
+        .brand { 
+            display: flex; align-items: center; 
+        }
         .brand img {
-            height: 55px; 
+            height: 50px; 
             width: auto;
             filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
             transition: transform 0.3s;
         }
         .brand img:hover { transform: scale(1.05); }
 
+        /* Style Teks Judul */
+        .brand span {
+            font-size: 20px;
+            font-weight: bold;
+            margin-left: 12px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #ecf0f1;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+
         .controls { display: flex; gap: 8px; align-items: center; }
         
-        /* TOMBOL NAVIGASI UPDATE (Support SVG) */
         .controls button, .controls a.btn-link {
-            padding: 8px 15px; border: none; border-radius: 6px; /* Radius dikurangi biar lebih kotak modern */
+            padding: 8px 15px; border: none; border-radius: 6px;
             font-weight: 600; cursor: pointer;
             transition: 0.2s; font-size: 13px;
             text-decoration: none; 
-            display: inline-flex; align-items: center; gap: 8px; /* Jarak ikon ke teks */
+            display: inline-flex; align-items: center; gap: 8px; 
             color: white;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
         
         .controls button svg, .controls a svg {
-            width: 18px; height: 18px; fill: currentColor; /* SVG mengikuti warna teks */
+            width: 18px; height: 18px; fill: currentColor; 
         }
         
         .controls button:hover { transform: translateY(-2px); }
@@ -94,12 +107,11 @@
             border-color: rgba(0,0,0,0.1);
         }
         
-        /* CSS KHUSUS AGAR SVG DI KARTU RAPI */
         .card-icon { 
             font-size: 40px; margin-bottom: 10px; height: 50px; display: flex; align-items: center;
         }
         .card-icon svg {
-            width: 48px; height: 48px; fill: var(--text-main); /* Warna ikon mengikuti tema */
+            width: 48px; height: 48px; fill: var(--text-main); 
         }
 
         .card-title { font-size: 18px; font-weight: bold; margin: 0 0 5px 0; }
@@ -157,6 +169,8 @@
 
         @media (max-width: 900px) {
             .navbar { flex-direction: column; gap: 15px; padding-bottom: 20px; }
+            .brand span { font-size: 16px; margin-left: 8px; } /* Kecilkan teks di HP */
+            .brand img { height: 40px; }
             .controls { flex-wrap: wrap; justify-content: center; }
             .container { grid-template-columns: 1fr; }
         }
@@ -166,7 +180,8 @@
 
     <div class="navbar">
         <div class="brand">
-            <img src="QIRAATI.png" alt="Logo EBTAQ" onerror="this.style.display='none'; this.parentNode.innerHTML='🚀 BERANDA EBTAQ'">
+            <img src="QIRAATI.png" alt="Logo" onerror="this.src='https://via.placeholder.com/50?text=LOGO'">
+            <span>DASHBOARD EBTAQ</span>
         </div>
         <div class="controls">
             <a href="https://github.com/korcabqiroatidemak/dashboardebtaq/blob/main/index.html" target="_blank" class="btn-link btn-source" title="Edit Source Code">
