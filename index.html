@@ -3,13 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard EBTAQ | Master v2.8</title>
+    <title>Dashboard EBTAQ | v3.0 Multi-Space</title>
     <style>
         :root {
             --bg-color: #f8fafc;
             --card-bg: #ffffff;
             --text-main: #1e293b;
-            --accent: #e74c3c;
+            --sidebar-width: 80px; /* Lebar Sidebar */
+            --sidebar-bg: #0f172a;
+            
             /* Default Theme */
             --grad-start: #1a1a1a;
             --grad-end: #FFC40D;
@@ -21,7 +23,63 @@
             background-color: var(--bg-color);
             margin: 0; padding: 0;
             color: var(--text-main);
-            transition: background 0.4s ease;
+            display: flex; /* Layout Kiri-Kanan */
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* --- SIDEBAR (KIRI) --- */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--sidebar-bg);
+            height: 100vh;
+            position: fixed; top: 0; left: 0;
+            display: flex; flex-direction: column; align-items: center;
+            padding-top: 20px; gap: 15px;
+            z-index: 200;
+            box-shadow: 4px 0 15px rgba(0,0,0,0.1);
+            transition: width 0.3s ease;
+        }
+
+        .menu-item {
+            width: 50px; height: 50px;
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; color: rgba(255,255,255,0.4);
+            transition: all 0.3s;
+            position: relative;
+        }
+        .menu-item:hover { background: rgba(255,255,255,0.1); color: white; }
+        .menu-item.active { 
+            background: var(--grad-end); 
+            color: #1a1a1a; /* Kontras dengan warna tema */
+            box-shadow: 0 0 15px var(--grad-end);
+        }
+        .menu-item svg { width: 24px; height: 24px; fill: currentColor; }
+        
+        /* Tooltip Nama Halaman */
+        .menu-item::after {
+            content: attr(data-label);
+            position: absolute; left: 60px;
+            background: #1e293b; color: white;
+            padding: 5px 10px; border-radius: 6px;
+            font-size: 12px; opacity: 0; visibility: hidden;
+            transition: 0.2s; white-space: nowrap; pointer-events: none;
+        }
+        .menu-item:hover::after { opacity: 1; visibility: visible; left: 65px; }
+
+        /* Tombol Tambah Halaman (Admin Only) */
+        .add-page-btn { 
+            margin-top: auto; margin-bottom: 20px; 
+            border: 1px dashed rgba(255,255,255,0.3); 
+        }
+        
+        /* --- MAIN CONTENT (KANAN) --- */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            display: flex; flex-direction: column;
+            width: calc(100% - var(--sidebar-width));
         }
 
         /* NAVBAR */
@@ -29,7 +87,7 @@
             background: linear-gradient(135deg, var(--grad-start), var(--grad-end));
             padding: 15px 40px;
             display: flex; justify-content: space-between; align-items: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             position: sticky; top: 0; z-index: 100;
             min-height: 85px;
         }
@@ -38,11 +96,7 @@
             display: flex; align-items: center; position: relative; 
             padding: 5px 10px; border-radius: 10px; transition: 0.3s;
         }
-        body.edit-active .brand {
-            cursor: pointer;
-            outline: 2px dashed rgba(255,255,255,0.5);
-            background: rgba(0,0,0,0.2);
-        }
+        body.edit-active .brand { cursor: pointer; outline: 2px dashed rgba(255,255,255,0.5); background: rgba(0,0,0,0.2); }
         .header-edit-icon { display: none; margin-left:10px; font-size: 18px; color: white; }
         body.edit-active .header-edit-icon { display: block; }
 
@@ -75,17 +129,15 @@
             padding: 10px 16px; border: none; border-radius: 8px; 
             font-weight: 700; cursor: pointer; color: white; 
             text-decoration: none; display: inline-flex; align-items: center; gap: 5px;
-            font-size: 13.33px; /* Match button default font size */
+            font-size: 13.33px;
         }
-        
         .btn-add { background: #27ae60; }
         .btn-backup { background: #3498db; }
         .btn-source { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2) !important; }
-        .btn-source:hover { background: rgba(0,0,0,0.5); }
 
-        /* CONTAINER */
+        /* CARD CONTAINER */
         .container {
-            max-width: 1300px; margin: 50px auto; padding: 0 30px;
+            padding: 30px 40px;
             display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 30px;
         }
 
@@ -98,24 +150,24 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.05);
             border-top: 5px solid var(--grad-end);
             overflow: hidden;
+            animation: fadeIn 0.4s ease;
         }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
         .card:hover { transform: translateY(-8px); box-shadow: 0 12px 24px rgba(0,0,0,0.1); }
-        
         .card-icon { font-size: 45px; margin-bottom: 12px; }
         .card-icon svg { fill: var(--grad-end); } 
-        
         .card-title { font-size: 20px; font-weight: 800; margin-bottom: 8px; padding-right: 30px; }
         .card-desc { font-size: 14px; color: #64748b; line-height: 1.5; }
         .card-link-overlay { position: absolute; inset: 0; z-index: 1; }
 
-        /* QR CODE BUTTON */
+        /* QR BUTTON */
         .qr-btn {
             position: absolute; top: 15px; right: 15px;
             width: 32px; height: 32px;
             background: rgba(0,0,0,0.05); border-radius: 8px;
             display: flex; align-items: center; justify-content: center;
-            z-index: 5; cursor: pointer; transition: 0.2s;
-            color: #94a3b8;
+            z-index: 5; cursor: pointer; transition: 0.2s; color: #94a3b8;
         }
         .qr-btn:hover { background: var(--grad-end); color: #fff; transform: scale(1.1); box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
         .qr-btn svg { width: 18px; height: 18px; fill: currentColor; }
@@ -140,7 +192,7 @@
         .mini-btn { width: 28px; height: 28px; border-radius: 50%; border: none; cursor: pointer; color: white; display: flex; align-items: center; justify-content: center; }
         .btn-del { background: #ef4444; } .btn-mod { background: #3b82f6; } .btn-move { background: #64748b; }
 
-        /* MODAL COMMON */
+        /* MODALS */
         .modal {
             display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8);
             z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(5px);
@@ -148,13 +200,13 @@
         .modal-content { background: white; padding: 30px; border-radius: 15px; width: 450px; position: relative; }
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; font-weight: 700; margin-bottom: 5px; font-size: 13px; }
-        .form-group input, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
         .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
 
-        /* QR MODAL SPECIFIC */
+        /* QR SPECIFIC */
         #qrDisplay { text-align: center; margin-top: 10px; }
         #qrImage { width: 200px; height: 200px; border: 10px solid #fff; box-shadow: 0 5px 20px rgba(0,0,0,0.1); border-radius: 10px; }
-        .qr-title { font-weight: 800; font-size: 20px; margin-bottom: 5px; color: var(--text-main); text-align: center; }
+        .qr-title { font-weight: 800; font-size: 20px; margin-bottom: 5px; text-align: center; }
         .qr-link { font-size: 12px; color: #64748b; word-break: break-all; text-align: center; display: block; margin-top: 10px; }
 
         /* THEME GRID */
@@ -166,28 +218,32 @@
 </head>
 <body id="mainBody">
 
-    <div class="floating-gear" onclick="toggleEditMode()" id="editTrigger" title="Pengaturan Admin">
+    <div class="sidebar" id="sidebarMenu">
+        </div>
+
+    <div class="main-content">
+        <div class="navbar">
+            <div class="brand" onclick="openHeaderModal()">
+                <img id="navLogo" src="QIRAATI.png" alt="Logo" onerror="this.src='https://via.placeholder.com/70'">
+                <span id="navTitle">DASHBOARD</span>
+                <div class="header-edit-icon">✎</div>
+            </div>
+            <div class="controls">
+                <a id="navRepo" href="#" target="_blank" class="btn-link btn-source admin-only">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="white"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"></path></svg> Kode
+                </a>
+                <button class="btn-backup admin-only" onclick="backupData()">💾 Backup</button>
+                <button class="btn-backup admin-only" onclick="restoreData()">📂 Restore</button>
+                <button class="btn-add admin-only" onclick="openModal()">+ Proyek</button>
+            </div>
+        </div>
+
+        <div class="container" id="cardContainer"></div>
+    </div>
+
+    <div class="floating-gear" onclick="toggleEditMode()" id="editTrigger" title="Mode Admin">
         <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.04.17 0 .36.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.04-.22 0-.41-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"></path></svg>
     </div>
-
-    <div class="navbar">
-        <div class="brand" onclick="openHeaderModal()">
-            <img id="navLogo" src="QIRAATI.png" alt="Logo" onerror="this.src='https://via.placeholder.com/70'">
-            <span id="navTitle">DASHBOARD EBTAQ</span>
-            <div class="header-edit-icon">✎</div>
-        </div>
-        <div class="controls">
-            <a id="navRepo" href="#" target="_blank" class="btn-link btn-source admin-only" title="Buka Source Code / Repository">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="white"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"></path></svg> Kode
-            </a>
-            
-            <button class="btn-backup admin-only" onclick="backupData()">💾 Backup</button>
-            <button class="btn-backup admin-only" onclick="restoreData()">📂 Restore</button>
-            <button class="btn-add admin-only" onclick="openModal()">+ Proyek</button>
-        </div>
-    </div>
-
-    <div class="container" id="cardContainer"></div>
 
     <div class="modal" id="projectModal">
         <div class="modal-content">
@@ -195,13 +251,16 @@
             <input type="hidden" id="editIndex"> 
             <div class="form-group"><label>Judul</label><input type="text" id="inpTitle"></div>
             <div class="form-group"><label>Deskripsi</label><textarea id="inpDesc"></textarea></div>
-            <div class="form-group"><label>Ikon (Emoji/SVG)</label>
-                <input type="text" id="inpIcon" placeholder="Paste kode SVG... (Auto Clean)">
+            <div class="form-group"><label>Ikon (SVG Auto Clean)</label>
+                <input type="text" id="inpIcon" placeholder="Paste kode SVG...">
             </div>
-            <div class="form-group"><label>Link Output (Utama)</label><input type="text" id="inpLink"></div>
-            <div class="form-group"><label>Link Khusus QR (Opsional)</label>
-                <input type="text" id="inpQrLink" placeholder="Kosongkan jika sama dengan Link Output">
+            
+            <div class="form-group"><label>Halaman / Kategori</label>
+                <select id="inpCategory"></select>
             </div>
+
+            <div class="form-group"><label>Link Output</label><input type="text" id="inpLink"></div>
+            <div class="form-group"><label>Link Khusus QR</label><input type="text" id="inpQrLink"></div>
             <div class="form-group"><label>Link Source (Shift+Click)</label><input type="text" id="inpEditLink"></div>
             <div class="modal-actions">
                 <button onclick="closeModal('projectModal')">Batal</button>
@@ -212,14 +271,23 @@
 
     <div class="modal" id="headerModal">
         <div class="modal-content">
-            <h3 style="margin:0 0 15px 0; border-bottom:1px solid #eee; padding-bottom:10px;">Setting Dashboard</h3>
-            <div class="form-group"><label>Judul Halaman</label><input type="text" id="cfgTitle"></div>
-            <div class="form-group"><label>Nama File Logo</label><input type="text" id="cfgLogo"></div>
-            <div class="form-group"><label>Link Repository / Kode (Utk Tombol 'Kode')</label>
-                <input type="text" id="cfgRepo" placeholder="https://github.com/...">
+            <h3 style="margin:0 0 15px 0; border-bottom:1px solid #eee;">Setting Dashboard</h3>
+            
+            <div style="background:#f8fafc; padding:15px; border-radius:10px; margin-bottom:15px; border:1px solid #e2e8f0;">
+                <label style="font-weight:bold; font-size:12px; display:block; margin-bottom:8px;">TAMBAH HALAMAN BARU</label>
+                <div style="display:flex; gap:5px;">
+                    <input type="text" id="newPageName" placeholder="Nama Halaman (misal: Keuangan)">
+                    <button onclick="addNewPage()" style="background:#27ae60; color:white; border:none; padding:0 15px; border-radius:6px;">+</button>
+                </div>
+                <div style="font-size:11px; color:#64748b; margin-top:5px;">*Refresh halaman setelah menambah.</div>
             </div>
+
+            <div class="form-group"><label>Judul Dashboard</label><input type="text" id="cfgTitle"></div>
+            <div class="form-group"><label>File Logo</label><input type="text" id="cfgLogo"></div>
+            <div class="form-group"><label>Link Repo</label><input type="text" id="cfgRepo"></div>
+            
             <div class="form-group">
-                <label>Pilih Tema Warna</label>
+                <label>Pilih Tema</label>
                 <div class="theme-grid" id="themeGrid"></div>
             </div>
             <div class="modal-actions">
@@ -231,11 +299,9 @@
 
     <div class="modal" id="qrModal" onclick="closeModal('qrModal')">
         <div class="modal-content" onclick="event.stopPropagation()">
-            <div class="qr-title" id="qrTitleDisplay">Judul Proyek</div>
-            <div id="qrDisplay">
-                <img id="qrImage" src="" alt="Loading QR...">
-            </div>
-            <a href="#" target="_blank" class="qr-link" id="qrLinkDisplay">https://example.com</a>
+            <div class="qr-title" id="qrTitleDisplay">Judul</div>
+            <div id="qrDisplay"><img id="qrImage" src="" alt="Loading..."></div>
+            <a href="#" target="_blank" class="qr-link" id="qrLinkDisplay">link</a>
             <div style="text-align:center; margin-top:20px;">
                 <button onclick="closeModal('qrModal')" style="background:#64748b; color:white; border:none; padding:8px 20px; border-radius:50px; cursor:pointer;">Tutup</button>
             </div>
@@ -245,16 +311,26 @@
     <input type="file" id="fileInput" style="display: none;" onchange="handleFileSelect(this)">
 
 <script>
-    // --- DATABASE ---
+    // --- DATABASE MIGRATION & INIT ---
     let projects = JSON.parse(localStorage.getItem('myProjectsDB')) || [];
-    // Update Config Database untuk menyimpan Repo Link
     let config = JSON.parse(localStorage.getItem('dashboardConfig')) || {
-        title: "DASHBOARD EBTAQ", 
-        logo: "QIRAATI.png", 
-        themeIdx: 7,
-        repo: "https://github.com/korcabqiroatidemak/dashboardebtaq/blob/main/index.html" // Default
+        title: "DASHBOARD EBTAQ", logo: "QIRAATI.png", themeIdx: 7, repo: ""
     };
+    
+    // Database Halaman (Pages)
+    let pages = JSON.parse(localStorage.getItem('dashboardPages')) || [
+        { id: 'home', name: 'UTAMA', icon: '<svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>' }
+    ];
 
+    // Migrasi Data Lama (Jika belum punya kategori, masukkan ke 'home')
+    let hasMigration = false;
+    projects.forEach(p => {
+        if (!p.category) { p.category = 'home'; hasMigration = true; }
+    });
+    if(hasMigration) localStorage.setItem('myProjectsDB', JSON.stringify(projects));
+
+    // State Variables
+    let activePageId = 'home';
     let isEditMode = false;
     let tempThemeIdx = config.themeIdx;
 
@@ -269,41 +345,68 @@
         { s: "#1a1a1a", e: "#FFC40D", t: "#FFC40D" }
     ];
 
-    // --- KEAMANAN SHIFT ---
-    window.addEventListener('keydown', (e) => { if(e.key === 'Shift') document.body.classList.add('shift-on'); });
-    window.addEventListener('keyup', (e) => { if(e.key === 'Shift') document.body.classList.remove('shift-on'); });
+    // --- RENDER SYSTEM ---
+    function init() {
+        renderSidebar();
+        renderMain();
+    }
 
-    function render() {
+    function renderSidebar() {
+        const sidebar = document.getElementById('sidebarMenu');
+        sidebar.innerHTML = '';
+
+        pages.forEach(page => {
+            const btn = document.createElement('div');
+            btn.className = `menu-item ${page.id === activePageId ? 'active' : ''}`;
+            btn.setAttribute('data-label', page.name);
+            // Jika ikon belum ada (untuk page baru), pakai default kotak
+            btn.innerHTML = page.icon || '<svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>';
+            btn.onclick = () => { activePageId = page.id; init(); };
+            sidebar.appendChild(btn);
+        });
+
+        // Tombol Tambah Halaman (Hanya muncul di Edit Mode)
+        // Kita masukkan ke dalam Modal Setting saja agar Sidebar bersih
+    }
+
+    function renderMain() {
+        // Render Header Config
         const theme = themes[config.themeIdx];
         document.documentElement.style.setProperty('--grad-start', theme.s);
         document.documentElement.style.setProperty('--grad-end', theme.e);
         document.documentElement.style.setProperty('--nav-text', theme.t);
-        
         document.getElementById('navTitle').innerText = config.title;
         document.getElementById('navLogo').src = config.logo;
-        
-        // Update Link Tombol Repo
-        const repoBtn = document.getElementById('navRepo');
-        repoBtn.href = config.repo || "#";
+        document.getElementById('navRepo').href = config.repo || "#";
 
+        // Filter Projects by Active Page
         const container = document.getElementById('cardContainer');
-        container.innerHTML = projects.length ? '' : `<div style="grid-column:1/-1; text-align:center; padding:50px; color:#94a3b8;">Dashboard Kosong. Masuk Mode Edit untuk menambah.</div>`;
+        // Filter: Hanya ambil proyek yang kategorinya sama dengan halaman aktif
+        const filteredProjects = projects.filter(p => p.category === activePageId);
         
-        projects.forEach((p, i) => {
+        container.innerHTML = filteredProjects.length ? '' : 
+            `<div style="grid-column:1/-1; text-align:center; padding:50px; color:#94a3b8;">
+                <h3>Halaman: ${pages.find(p=>p.id===activePageId).name}</h3>
+                <p>Belum ada proyek di sini.</p>
+            </div>`;
+        
+        // Kita butuh Index Asli dari Array Utama untuk fungsi Edit/Delete
+        // Jadi kita loop array utama, tapi hanya render jika cocok
+        projects.forEach((p, realIndex) => {
+            if (p.category !== activePageId) return; // Skip jika beda kategori
+
             const card = document.createElement('div');
             card.className = 'card';
             card.innerHTML = `
                 <div class="editor-controls">
-                    <button class="mini-btn btn-move" onclick="moveProject(${i},-1)">◀</button>
-                    <button class="mini-btn btn-move" onclick="moveProject(${i},1)">▶</button>
-                    <button class="mini-btn btn-mod" onclick="editProject(${i})">✎</button>
-                    <button class="mini-btn btn-del" onclick="deleteProject(${i})">✖</button>
+                    <button class="mini-btn btn-move" onclick="moveProject(${realIndex},-1)">◀</button>
+                    <button class="mini-btn btn-move" onclick="moveProject(${realIndex},1)">▶</button>
+                    <button class="mini-btn btn-mod" onclick="editProject(${realIndex})">✎</button>
+                    <button class="mini-btn btn-del" onclick="deleteProject(${realIndex})">✖</button>
                 </div>
-                
-                <div class="qr-btn" onclick="showQr(${i}); event.stopPropagation();" title="Scan QR Code">
+                <div class="qr-btn" onclick="showQr(${realIndex}); event.stopPropagation();" title="QR Code">
                     <svg viewBox="0 0 24 24"><path d="M3 3h6v6H3V3zm2 2v2h2V5H5zm8-2h6v6h-6V3zm2 2v2h2V5h-2zM3 13h6v6H3v-6zm2 2v2h2v-2H5zm13-2h3v2h-3v-2zm-3 2h2v2h-2v-2zm3 2h3v2h-3v-2zM3 21h2v-2H3v2zm4-4h2v2H7v-2zm-4-4h2v2H3v-2zm8 0h2v2h-2v-2zm4 4h2v2h-2v-2zm-4-4h2v2h-2v-2zm4-4h2v2h-2v-2z"></path></svg>
                 </div>
-
                 <div class="secret-gear" onclick="window.open('${p.editLink}', '_blank'); event.stopPropagation();">
                     <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.04.17 0 .36.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.04-.22 0-.41-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"></path></svg>
                 </div>
@@ -316,28 +419,134 @@
         });
     }
 
-    // --- QR SYSTEM ---
-    function showQr(index) {
-        const p = projects[index];
-        const targetUrl = p.qrLink ? p.qrLink : p.link;
-        document.getElementById('qrTitleDisplay').innerText = p.title;
-        document.getElementById('qrLinkDisplay').innerText = targetUrl;
-        document.getElementById('qrLinkDisplay').href = targetUrl;
-        const apiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&color=000000&bgcolor=ffffff&data=${encodeURIComponent(targetUrl)}`;
-        document.getElementById('qrImage').src = apiUrl;
-        document.getElementById('qrModal').style.display = 'flex';
+    // --- PAGE MANAGER ---
+    function addNewPage() {
+        const name = document.getElementById('newPageName').value;
+        if(!name) return alert("Nama halaman tidak boleh kosong!");
+        const id = name.toLowerCase().replace(/\s+/g, '_');
+        
+        // Cek duplikat
+        if(pages.find(p => p.id === id)) return alert("Halaman sudah ada!");
+        
+        pages.push({ id: id, name: name, icon: null });
+        localStorage.setItem('dashboardPages', JSON.stringify(pages));
+        alert("Halaman berhasil dibuat! Silakan refresh atau tutup menu.");
+        renderSidebar();
+        document.getElementById('newPageName').value = '';
     }
 
+    // --- CRUD PROYEK ---
+    function saveProject() {
+        let iconRaw = document.getElementById('inpIcon').value;
+        if(iconRaw.includes('<svg')) { iconRaw = iconRaw.replace(/fill=['"][^'"]*['"]/gi, ""); }
+
+        const data = {
+            title: document.getElementById('inpTitle').value,
+            desc: document.getElementById('inpDesc').value,
+            icon: iconRaw,
+            link: document.getElementById('inpLink').value,
+            editLink: document.getElementById('inpEditLink').value,
+            qrLink: document.getElementById('inpQrLink').value,
+            // AMBIL KATEGORI DARI DROPDOWN (Bisa Pindah Halaman)
+            category: document.getElementById('inpCategory').value
+        };
+        
+        const idx = parseInt(document.getElementById('editIndex').value);
+        if(!data.title || !data.link) return alert("Wajib diisi!");
+        
+        if(idx === -1) projects.push(data); else projects[idx] = data;
+        
+        localStorage.setItem('myProjectsDB', JSON.stringify(projects));
+        init(); closeModal('projectModal');
+    }
+
+    function openModal() {
+        document.getElementById('editIndex').value = '-1';
+        ['inpTitle','inpDesc','inpIcon','inpLink','inpEditLink','inpQrLink'].forEach(id => document.getElementById(id).value = '');
+        
+        // Render Pilihan Kategori di Modal
+        const catSelect = document.getElementById('inpCategory');
+        catSelect.innerHTML = '';
+        pages.forEach(pg => {
+            const opt = document.createElement('option');
+            opt.value = pg.id;
+            opt.innerText = pg.name;
+            if(pg.id === activePageId) opt.selected = true; // Auto select halaman aktif
+            catSelect.appendChild(opt);
+        });
+
+        document.getElementById('projectModal').style.display = 'flex';
+    }
+
+    function editProject(i) {
+        const p = projects[i];
+        document.getElementById('editIndex').value = i;
+        document.getElementById('inpTitle').value = p.title;
+        document.getElementById('inpDesc').value = p.desc;
+        document.getElementById('inpIcon').value = p.icon;
+        document.getElementById('inpLink').value = p.link;
+        document.getElementById('inpEditLink').value = p.editLink;
+        document.getElementById('inpQrLink').value = p.qrLink || '';
+        
+        // Render Dropdown & Select current category
+        const catSelect = document.getElementById('inpCategory');
+        catSelect.innerHTML = '';
+        pages.forEach(pg => {
+            const opt = document.createElement('option');
+            opt.value = pg.id;
+            opt.innerText = pg.name;
+            if(pg.id === p.category) opt.selected = true; 
+            catSelect.appendChild(opt);
+        });
+
+        document.getElementById('projectModal').style.display = 'flex';
+    }
+
+    function deleteProject(i) {
+        if(confirm("Hapus Proyek ini?")) {
+            projects.splice(i,1);
+            localStorage.setItem('myProjectsDB', JSON.stringify(projects));
+            init();
+        }
+    }
+    
+    // --- MOVEMENT ---
+    // Move project hanya berlaku di dalam satu kategori yang sama agar tidak loncat halaman
+    function moveProject(realIdx, dir) {
+        // Cari proyek lain di kategori yang sama untuk ditukar
+        const currentCat = projects[realIdx].category;
+        
+        // Buat array subset
+        let subsetIndices = [];
+        projects.forEach((p, idx) => {
+            if(p.category === currentCat) subsetIndices.push(idx);
+        });
+        
+        // Cari posisi realIdx di dalam subset
+        let subsetPos = subsetIndices.indexOf(realIdx);
+        let targetSubsetPos = subsetPos + dir;
+
+        if(targetSubsetPos >= 0 && targetSubsetPos < subsetIndices.length) {
+            let targetRealIdx = subsetIndices[targetSubsetPos];
+            // Swap
+            [projects[realIdx], projects[targetRealIdx]] = [projects[targetRealIdx], projects[realIdx]];
+            localStorage.setItem('myProjectsDB', JSON.stringify(projects));
+            init();
+        }
+    }
+
+    // --- SYSTEM & MODALS ---
     function toggleEditMode() {
         isEditMode = !isEditMode;
         document.body.classList.toggle('edit-active', isEditMode);
+        init(); // Re-render untuk show/hide tombol page manager jika ada
     }
 
     function openHeaderModal() {
         if(!isEditMode) return;
         document.getElementById('cfgTitle').value = config.title;
         document.getElementById('cfgLogo').value = config.logo;
-        document.getElementById('cfgRepo').value = config.repo || ""; // Load Data
+        document.getElementById('cfgRepo').value = config.repo || "";
         tempThemeIdx = config.themeIdx;
         renderThemeOptions();
         document.getElementById('headerModal').style.display = 'flex';
@@ -359,90 +568,60 @@
     function saveHeaderConfig() {
         config.title = document.getElementById('cfgTitle').value;
         config.logo = document.getElementById('cfgLogo').value;
-        config.repo = document.getElementById('cfgRepo').value; // Simpan Repo Link
+        config.repo = document.getElementById('cfgRepo').value;
         config.themeIdx = tempThemeIdx;
         localStorage.setItem('dashboardConfig', JSON.stringify(config));
-        render(); closeModal('headerModal');
+        init(); closeModal('headerModal');
     }
 
-    function openModal() {
-        document.getElementById('editIndex').value = '-1';
-        ['inpTitle','inpDesc','inpIcon','inpLink','inpEditLink','inpQrLink'].forEach(id => document.getElementById(id).value = '');
-        document.getElementById('projectModal').style.display = 'flex';
+    function showQr(index) {
+        const p = projects[index];
+        const targetUrl = p.qrLink ? p.qrLink : p.link;
+        document.getElementById('qrTitleDisplay').innerText = p.title;
+        document.getElementById('qrLinkDisplay').innerText = targetUrl;
+        document.getElementById('qrLinkDisplay').href = targetUrl;
+        document.getElementById('qrImage').src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&color=000000&bgcolor=ffffff&data=${encodeURIComponent(targetUrl)}`;
+        document.getElementById('qrModal').style.display = 'flex';
     }
 
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
-    // --- CRUD ---
-    function saveProject() {
-        let iconRaw = document.getElementById('inpIcon').value;
-        if(iconRaw.includes('<svg')) { iconRaw = iconRaw.replace(/fill=['"][^'"]*['"]/gi, ""); }
-
-        const data = {
-            title: document.getElementById('inpTitle').value,
-            desc: document.getElementById('inpDesc').value,
-            icon: iconRaw,
-            link: document.getElementById('inpLink').value,
-            editLink: document.getElementById('inpEditLink').value,
-            qrLink: document.getElementById('inpQrLink').value
-        };
-        const idx = parseInt(document.getElementById('editIndex').value);
-        if(!data.title || !data.link) return alert("Wajib diisi!");
-        
-        if(idx === -1) projects.push(data); else projects[idx] = data;
-        
-        localStorage.setItem('myProjectsDB', JSON.stringify(projects));
-        render(); closeModal('projectModal');
-    }
-
-    function deleteProject(i) { if(confirm("Hapus?")) { projects.splice(i,1); localStorage.setItem('myProjectsDB', JSON.stringify(projects)); render(); } }
-    
-    function editProject(i) {
-        const p = projects[i];
-        document.getElementById('editIndex').value = i;
-        document.getElementById('inpTitle').value = p.title;
-        document.getElementById('inpDesc').value = p.desc;
-        document.getElementById('inpIcon').value = p.icon;
-        document.getElementById('inpLink').value = p.link;
-        document.getElementById('inpEditLink').value = p.editLink;
-        document.getElementById('inpQrLink').value = p.qrLink || '';
-        document.getElementById('projectModal').style.display = 'flex';
-    }
-
-    function moveProject(i, d) {
-        const ni = i + d;
-        if(ni >= 0 && ni < projects.length) {
-            [projects[i], projects[ni]] = [projects[ni], projects[i]];
-            localStorage.setItem('myProjectsDB', JSON.stringify(projects)); render();
-        }
-    }
-
+    // --- BACKUP RESTORE (Include Pages now) ---
     function backupData() {
-        const bundle = { projects, config };
+        const bundle = { projects, config, pages };
         const blob = new Blob([JSON.stringify(bundle)], {type: 'application/json'});
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = `backup_ebtaq.json`;
+        a.download = `backup_ebtaq_v3.json`;
         a.click();
     }
     
     function restoreData() { document.getElementById('fileInput').click(); }
-
     function handleFileSelect(input) {
         const reader = new FileReader();
         reader.onload = e => {
             const data = JSON.parse(e.target.result);
             if(data.projects && data.config) {
                 projects = data.projects; config = data.config;
+                // Support restore pages jika ada, jika tidak pakai default
+                if(data.pages) pages = data.pages; 
+                
                 localStorage.setItem('myProjectsDB', JSON.stringify(projects));
                 localStorage.setItem('dashboardConfig', JSON.stringify(config));
-                render(); alert("Berhasil!");
+                localStorage.setItem('dashboardPages', JSON.stringify(pages));
+                
+                init(); alert("Berhasil Restore!");
             }
         };
         reader.readAsText(input.files[0]);
     }
+    
+    // Shift Security
+    window.addEventListener('keydown', (e) => { if(e.key === 'Shift') document.body.classList.add('shift-on'); });
+    window.addEventListener('keyup', (e) => { if(e.key === 'Shift') document.body.classList.remove('shift-on'); });
 
-    render();
+    // Start
+    init();
 </script>
 </body>
 </html>
