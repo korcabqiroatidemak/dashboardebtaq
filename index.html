@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard EBTAQ | v3.1 Manager</title>
+    <title>Dashboard EBTAQ | v3.2 Egalitarian</title>
     <style>
         :root {
             --bg-color: #f8fafc;
@@ -11,7 +11,8 @@
             --text-main: #1e293b;
             --sidebar-width: 80px; 
             --sidebar-bg: #0f172a;
-            /* Default Theme */
+            
+            /* Global Theme Variables */
             --grad-start: #1a1a1a;
             --grad-end: #FFC40D;
             --nav-text: #FFC40D;
@@ -26,12 +27,12 @@
             transition: background 0.4s ease;
         }
 
-        /* SIDEBAR */
+        /* --- SIDEBAR (KIRI) --- */
         .sidebar {
             width: var(--sidebar-width); background: var(--sidebar-bg);
             height: 100vh; position: fixed; top: 0; left: 0;
             display: flex; flex-direction: column; align-items: center;
-            padding-top: 20px; gap: 15px; z-index: 200;
+            padding-top: 25px; gap: 15px; z-index: 200;
             box-shadow: 4px 0 15px rgba(0,0,0,0.1);
         }
         .menu-item {
@@ -40,23 +41,24 @@
             cursor: pointer; color: rgba(255,255,255,0.4);
             transition: all 0.3s; position: relative;
         }
-        .menu-item:hover { background: rgba(255,255,255,0.1); color: white; }
+        .menu-item:hover { background: rgba(255,255,255,0.1); color: white; transform: scale(1.05); }
         .menu-item.active { 
             background: var(--grad-end); color: #1a1a1a; 
-            box-shadow: 0 0 15px var(--grad-end);
+            box-shadow: 0 0 15px var(--grad-end); transform: scale(1.1);
         }
         .menu-item svg { width: 24px; height: 24px; fill: currentColor; }
-        /* Tooltip */
+        
+        /* Tooltip Nama Halaman */
         .menu-item::after {
             content: attr(data-label); position: absolute; left: 60px;
             background: #1e293b; color: white; padding: 5px 10px; border-radius: 6px;
             font-size: 12px; opacity: 0; visibility: hidden; pointer-events: none;
-            transition: 0.2s; white-space: nowrap; z-index: 300;
+            transition: 0.2s; white-space: nowrap; z-index: 300; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
         .menu-item:hover::after { opacity: 1; visibility: visible; left: 65px; }
 
-        /* MAIN CONTENT */
-        .main-content { margin-left: var(--sidebar-width); flex: 1; width: calc(100% - var(--sidebar-width)); }
+        /* --- MAIN CONTENT (KANAN) --- */
+        .main-content { margin-left: var(--sidebar-width); flex: 1; width: calc(100% - var(--sidebar-width)); display: flex; flex-direction: column; }
 
         /* NAVBAR */
         .navbar {
@@ -69,10 +71,13 @@
         body.edit-active .brand { cursor: pointer; outline: 2px dashed rgba(255,255,255,0.5); background: rgba(0,0,0,0.2); }
         .header-edit-icon { display: none; margin-left:10px; font-size: 18px; color: white; }
         body.edit-active .header-edit-icon { display: block; }
+
         .brand img { height: 70px; width: auto; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3)); }
+        
+        /* JUDUL DINAMIS (PAGE NAME) */
         .brand span {
-            font-size: 32px; font-weight: 800; margin-left: 20px;
-            letter-spacing: 1.5px; text-transform: uppercase;
+            font-size: 36px; font-weight: 900; margin-left: 20px;
+            letter-spacing: 1px; text-transform: uppercase;
             color: var(--nav-text); text-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
 
@@ -87,8 +92,10 @@
         .btn-add { background: #27ae60; } .btn-backup { background: #3498db; }
         .btn-source { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2) !important; }
 
-        /* CARD */
+        /* CONTAINER */
         .container { padding: 30px 40px; display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 30px; }
+
+        /* CARD */
         .card {
             background: var(--card-bg); border-radius: 20px; padding: 25px;
             position: relative; transition: all 0.3s ease;
@@ -101,12 +108,12 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .card:hover { transform: translateY(-8px); box-shadow: 0 12px 24px rgba(0,0,0,0.1); }
         .card-icon { font-size: 45px; margin-bottom: 12px; }
-        .card-icon svg { fill: var(--grad-end); } 
+        .card-icon svg { fill: var(--grad-end); } /* Force Theme Color */
         .card-title { font-size: 20px; font-weight: 800; margin-bottom: 8px; padding-right: 30px; }
         .card-desc { font-size: 14px; color: #64748b; line-height: 1.5; }
         .card-link-overlay { position: absolute; inset: 0; z-index: 1; }
 
-        /* BUTTONS ON CARD */
+        /* CARD BUTTONS */
         .qr-btn {
             position: absolute; top: 15px; right: 15px; width: 32px; height: 32px;
             background: rgba(0,0,0,0.05); border-radius: 8px; display: flex; align-items: center; justify-content: center;
@@ -114,6 +121,7 @@
         }
         .qr-btn:hover { background: var(--grad-end); color: #fff; transform: scale(1.1); }
         body.edit-active .qr-btn { display: none; }
+        
         .editor-controls { position: absolute; top: 10px; right: 10px; display: none; gap: 5px; z-index: 20; }
         body.edit-active .editor-controls { display: flex; }
         .mini-btn { width: 28px; height: 28px; border-radius: 50%; border: none; cursor: pointer; color: white; display: flex; align-items: center; justify-content: center; }
@@ -146,18 +154,20 @@
         .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
         .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
 
-        /* PAGE MANAGER LIST STYLE (NEW) */
+        /* PAGE MANAGER LIST */
         .page-list-item {
             display: flex; align-items: center; justify-content: space-between;
-            padding: 8px 12px; background: #fff; border: 1px solid #e2e8f0; 
+            padding: 10px; background: #fff; border: 1px solid #e2e8f0; 
             margin-bottom: 5px; border-radius: 6px;
         }
-        .page-list-name { font-weight: 600; font-size: 14px; }
+        .page-list-name { font-weight: 700; font-size: 14px; color: #334155; }
         .page-list-controls { display: flex; gap: 5px; }
-        .btn-pg { width: 24px; height: 24px; border: none; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; }
-        .btn-pg-up { background: #64748b; } .btn-pg-down { background: #64748b; } .btn-pg-del { background: #ef4444; }
+        .btn-pg { width: 26px; height: 26px; border: none; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; }
+        .btn-pg-up, .btn-pg-down { background: #64748b; } 
+        .btn-pg-edit { background: #f39c12; }
+        .btn-pg-del { background: #ef4444; }
 
-        /* THEME GRID & QR */
+        /* THEME & QR */
         .theme-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 10px; }
         .theme-opt { height: 40px; border-radius: 8px; cursor: pointer; background: linear-gradient(135deg, var(--s), var(--e)); border: 3px solid transparent; }
         .theme-opt.active { border-color: #000; transform: scale(1.05); }
@@ -165,7 +175,6 @@
         #qrImage { width: 200px; height: 200px; border: 10px solid #fff; box-shadow: 0 5px 20px rgba(0,0,0,0.1); border-radius: 10px; }
         .qr-title { font-weight: 800; font-size: 20px; margin-bottom: 5px; text-align: center; }
         .qr-link { font-size: 12px; color: #64748b; word-break: break-all; text-align: center; display: block; margin-top: 10px; }
-
     </style>
 </head>
 <body id="mainBody">
@@ -176,7 +185,7 @@
         <div class="navbar">
             <div class="brand" onclick="openHeaderModal()">
                 <img id="navLogo" src="QIRAATI.png" alt="Logo" onerror="this.src='https://via.placeholder.com/70'">
-                <span id="navTitle">DASHBOARD</span>
+                <span id="navTitle">BERANDA</span>
                 <div class="header-edit-icon">✎</div>
             </div>
             <div class="controls">
@@ -193,6 +202,27 @@
 
     <div class="floating-gear" onclick="toggleEditMode()" id="editTrigger"><svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.04.17 0 .36.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.04-.22 0-.41-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"></path></svg></div>
 
+    <div class="modal" id="headerModal">
+        <div class="modal-content">
+            <h3 style="margin:0 0 15px 0; border-bottom:1px solid #eee;">Pengaturan & Halaman</h3>
+            
+            <div style="background:#f1f5f9; padding:15px; border-radius:10px; margin-bottom:15px; border:1px solid #cbd5e1;">
+                <label style="font-weight:bold; font-size:12px; display:block; margin-bottom:8px; color:#334155;">DAFTAR HALAMAN (Geser / Edit Nama)</label>
+                <div id="pageListContainer" style="max-height:180px; overflow-y:auto; margin-bottom:10px;"></div>
+                <div style="display:flex; gap:5px; margin-top:10px; border-top:1px solid #ddd; padding-top:10px;">
+                    <input type="text" id="newPageName" placeholder="Nama Halaman Baru..." style="font-size:13px;">
+                    <button onclick="addNewPage()" style="background:#27ae60; color:white; border:none; padding:0 15px; border-radius:6px; font-weight:bold;">+</button>
+                </div>
+            </div>
+
+            <div class="form-group"><label>File Logo</label><input type="text" id="cfgLogo"></div>
+            <div class="form-group"><label>Link Repository</label><input type="text" id="cfgRepo"></div>
+            <div class="form-group"><label>Tema Warna</label><div class="theme-grid" id="themeGrid"></div></div>
+            
+            <div class="modal-actions"><button onclick="closeModal('headerModal')">Batal</button><button onclick="saveHeaderConfig()" style="background:#1a1a1a; color:white;">Simpan</button></div>
+        </div>
+    </div>
+
     <div class="modal" id="projectModal">
         <div class="modal-content">
             <h3 id="modalTitle">Data Proyek</h3>
@@ -200,34 +230,11 @@
             <div class="form-group"><label>Judul</label><input type="text" id="inpTitle"></div>
             <div class="form-group"><label>Deskripsi</label><textarea id="inpDesc"></textarea></div>
             <div class="form-group"><label>Ikon (SVG Auto Clean)</label><input type="text" id="inpIcon" placeholder="Paste kode SVG..."></div>
-            <div class="form-group"><label>Kategori</label><select id="inpCategory"></select></div>
+            <div class="form-group"><label>Halaman (Kategori)</label><select id="inpCategory"></select></div>
             <div class="form-group"><label>Link Output</label><input type="text" id="inpLink"></div>
             <div class="form-group"><label>Link QR</label><input type="text" id="inpQrLink"></div>
             <div class="form-group"><label>Link Source</label><input type="text" id="inpEditLink"></div>
             <div class="modal-actions"><button onclick="closeModal('projectModal')">Batal</button><button onclick="saveProject()" style="background:#27ae60; color:white;">Simpan</button></div>
-        </div>
-    </div>
-
-    <div class="modal" id="headerModal">
-        <div class="modal-content">
-            <h3 style="margin:0 0 15px 0; border-bottom:1px solid #eee;">Setting Dashboard</h3>
-            
-            <div style="background:#f1f5f9; padding:15px; border-radius:10px; margin-bottom:15px; border:1px solid #cbd5e1;">
-                <label style="font-weight:bold; font-size:12px; display:block; margin-bottom:8px; color:#334155;">MANAJEMEN HALAMAN</label>
-                
-                <div id="pageListContainer" style="max-height:150px; overflow-y:auto; margin-bottom:10px;"></div>
-
-                <div style="display:flex; gap:5px; margin-top:10px; border-top:1px solid #ddd; padding-top:10px;">
-                    <input type="text" id="newPageName" placeholder="Nama Halaman Baru..." style="font-size:13px;">
-                    <button onclick="addNewPage()" style="background:#27ae60; color:white; border:none; padding:0 15px; border-radius:6px; font-weight:bold;">+</button>
-                </div>
-            </div>
-
-            <div class="form-group"><label>Judul Dashboard</label><input type="text" id="cfgTitle"></div>
-            <div class="form-group"><label>File Logo</label><input type="text" id="cfgLogo"></div>
-            <div class="form-group"><label>Link Repo</label><input type="text" id="cfgRepo"></div>
-            <div class="form-group"><label>Tema Warna</label><div class="theme-grid" id="themeGrid"></div></div>
-            <div class="modal-actions"><button onclick="closeModal('headerModal')">Batal</button><button onclick="saveHeaderConfig()" style="background:#1a1a1a; color:white;">Simpan</button></div>
         </div>
     </div>
 
@@ -243,21 +250,28 @@
     <input type="file" id="fileInput" style="display: none;" onchange="handleFileSelect(this)">
 
 <script>
-    // --- DATABASE ---
+    // --- DB INIT ---
     let projects = JSON.parse(localStorage.getItem('myProjectsDB')) || [];
-    let config = JSON.parse(localStorage.getItem('dashboardConfig')) || {
-        title: "DASHBOARD EBTAQ", logo: "QIRAATI.png", themeIdx: 7, repo: ""
-    };
+    // Config: Hapus 'title' karena sekarang dinamis
+    let config = JSON.parse(localStorage.getItem('dashboardConfig')) || { logo: "QIRAATI.png", themeIdx: 7, repo: "" };
+    
+    // Default Pages: Jika kosong, buat 1 halaman awal
     let pages = JSON.parse(localStorage.getItem('dashboardPages')) || [
-        { id: 'home', name: 'UTAMA', icon: '<svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>' }
+        { id: 'p1', name: 'BERANDA', icon: '<svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>' }
     ];
 
-    // Migration Check
+    // Migration Check (Map old data to first page)
     let hasMigration = false;
-    projects.forEach(p => { if (!p.category) { p.category = 'home'; hasMigration = true; } });
+    projects.forEach(p => { 
+        if (!p.category) { p.category = pages[0].id; hasMigration = true; } 
+    });
     if(hasMigration) localStorage.setItem('myProjectsDB', JSON.stringify(projects));
 
-    let activePageId = pages[0].id; // Default to first page
+    // State
+    let activePageId = pages[0].id;
+    // Cek jika activePageId yang tersimpan (jika ada sesi sebelumnya) masih valid? Jika tidak, reset ke 0.
+    if(!pages.find(p => p.id === activePageId)) activePageId = pages[0].id;
+
     let isEditMode = false;
     let tempThemeIdx = config.themeIdx;
 
@@ -291,18 +305,17 @@
         document.getElementById('navLogo').src = config.logo;
         document.getElementById('navRepo').href = config.repo || "#";
 
-        // --- DYNAMIC TITLE LOGIC ---
-        const activePageName = pages.find(p => p.id === activePageId)?.name || 'UTAMA';
-        const displayTitle = (activePageId === 'home') ? config.title : `${config.title} | ${activePageName}`;
-        document.getElementById('navTitle').innerText = displayTitle;
-        // ---------------------------
+        // --- JUDUL = NAMA HALAMAN ---
+        const activePageObj = pages.find(p => p.id === activePageId) || pages[0];
+        document.getElementById('navTitle').innerText = activePageObj.name;
 
+        // Render Kartu (Hide/Show Logic)
         const container = document.getElementById('cardContainer');
         const filteredProjects = projects.filter(p => p.category === activePageId);
         
         container.innerHTML = filteredProjects.length ? '' : 
             `<div style="grid-column:1/-1; text-align:center; padding:50px; color:#94a3b8;">
-                <h3>${activePageName}</h3><p>Belum ada data.</p>
+                <h3>${activePageObj.name} Kosong</h3><p>Tambah proyek di sini.</p>
             </div>`;
         
         projects.forEach((p, realIndex) => {
@@ -331,35 +344,43 @@
         });
     }
 
-    // --- PAGE MANAGEMENT LOGIC ---
+    // --- PAGE MANAGER (EGALITARIAN LOGIC) ---
     function addNewPage() {
         const name = document.getElementById('newPageName').value;
         if(!name) return;
-        const id = name.toLowerCase().replace(/\s+/g, '_') + '_' + Date.now();
+        const id = 'pg_' + Date.now();
         pages.push({ id: id, name: name, icon: null });
         localStorage.setItem('dashboardPages', JSON.stringify(pages));
         document.getElementById('newPageName').value = '';
-        renderPageList(); // Refresh list di modal
-        init(); // Refresh UI utama
+        renderPageList(); init();
     }
 
     function renderPageList() {
         const listContainer = document.getElementById('pageListContainer');
         listContainer.innerHTML = '';
-        
         pages.forEach((pg, i) => {
             const div = document.createElement('div');
             div.className = 'page-list-item';
             div.innerHTML = `
                 <span class="page-list-name">${pg.name}</span>
                 <div class="page-list-controls">
+                    <button class="btn-pg btn-pg-edit" onclick="renamePage(${i})" title="Ganti Nama">✎</button>
                     ${i > 0 ? `<button class="btn-pg btn-pg-up" onclick="movePageOrder(${i}, -1)">▲</button>` : ''}
                     ${i < pages.length - 1 ? `<button class="btn-pg btn-pg-down" onclick="movePageOrder(${i}, 1)">▼</button>` : ''}
-                    ${i > 0 ? `<button class="btn-pg btn-pg-del" onclick="deletePage(${i})">✖</button>` : ''}
+                    <button class="btn-pg btn-pg-del" onclick="deletePage(${i})" title="Hapus">✖</button>
                 </div>
             `;
             listContainer.appendChild(div);
         });
+    }
+
+    function renamePage(index) {
+        const newName = prompt("Nama Baru untuk Halaman:", pages[index].name);
+        if(newName && newName.trim() !== "") {
+            pages[index].name = newName;
+            localStorage.setItem('dashboardPages', JSON.stringify(pages));
+            renderPageList(); init();
+        }
     }
 
     function movePageOrder(index, direction) {
@@ -372,60 +393,72 @@
     }
 
     function deletePage(index) {
-        if(index === 0) return alert("Halaman UTAMA tidak bisa dihapus!");
-        if(confirm(`Hapus halaman ${pages[index].name}? Proyek di dalamnya akan hilang/perlu dipindah.`)) {
-            // Cek apakah ada proyek di halaman ini?
-            // Opsi aman: Pindahkan proyek ke Home
-            const pageId = pages[index].id;
-            projects.forEach(p => { if(p.category === pageId) p.category = 'home'; });
-            localStorage.setItem('myProjectsDB', JSON.stringify(projects));
+        if(pages.length <= 1) return alert("Minimal harus ada satu halaman!");
+        
+        if(confirm(`Hapus halaman "${pages[index].name}"? Proyek di dalamnya akan dipindah ke halaman pertama.`)) {
+            const pageIdToDelete = pages[index].id;
             
-            // Hapus page
+            // Remove Page
             pages.splice(index, 1);
             localStorage.setItem('dashboardPages', JSON.stringify(pages));
+
+            // Move Orphans to First Page
+            const fallbackId = pages[0].id;
+            projects.forEach(p => { if(p.category === pageIdToDelete) p.category = fallbackId; });
+            localStorage.setItem('myProjectsDB', JSON.stringify(projects));
+
+            // Reset active page if deleted
+            if(activePageId === pageIdToDelete) activePageId = fallbackId;
             
-            if(activePageId === pageId) activePageId = 'home';
             renderPageList(); init();
         }
     }
 
-    // --- MODAL & SETTINGS ---
+    // --- MODALS ---
     function openHeaderModal() {
         if(!isEditMode) return;
-        document.getElementById('cfgTitle').value = config.title;
         document.getElementById('cfgLogo').value = config.logo;
         document.getElementById('cfgRepo').value = config.repo || "";
         tempThemeIdx = config.themeIdx;
-        renderThemeOptions();
-        renderPageList(); // RENDER LIST HALAMAN
+        renderThemeOptions(); renderPageList();
         document.getElementById('headerModal').style.display = 'flex';
     }
 
-    function toggleEditMode() {
-        isEditMode = !isEditMode;
-        document.body.classList.toggle('edit-active', isEditMode);
+    function saveHeaderConfig() {
+        // Hapus save Title dari sini, karena Title diambil dari Page Name
+        config.logo = document.getElementById('cfgLogo').value;
+        config.repo = document.getElementById('cfgRepo').value;
+        config.themeIdx = tempThemeIdx;
+        localStorage.setItem('dashboardConfig', JSON.stringify(config));
+        init(); closeModal('headerModal');
     }
-    
-    // ... (SISA FUNGSI SAMA SEPERTI v3.0: saveProject, editProject, showQr, dll) ...
+
+    // --- (SISA FUNCTION SAMA: CRUD, THEME, QR, BACKUP) ---
+    function toggleEditMode() { isEditMode = !isEditMode; document.body.classList.toggle('edit-active', isEditMode); init(); }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+    function renderThemeOptions() {
+        const grid = document.getElementById('themeGrid'); grid.innerHTML = '';
+        themes.forEach((t, i) => {
+            const opt = document.createElement('div'); opt.className = `theme-opt ${i === tempThemeIdx ? 'active' : ''}`;
+            opt.style.setProperty('--s', t.s); opt.style.setProperty('--e', t.e);
+            opt.onclick = () => { tempThemeIdx = i; renderThemeOptions(); }; grid.appendChild(opt);
+        });
+    }
     function saveProject() {
         let iconRaw = document.getElementById('inpIcon').value;
-        if(iconRaw.includes('<svg')) { iconRaw = iconRaw.replace(/fill=['"][^'"]*['"]/gi, ""); }
+        if(iconRaw.includes('<svg')) iconRaw = iconRaw.replace(/fill=['"][^'"]*['"]/gi, "");
         const data = {
-            title: document.getElementById('inpTitle').value,
-            desc: document.getElementById('inpDesc').value,
-            icon: iconRaw, link: document.getElementById('inpLink').value,
-            editLink: document.getElementById('inpEditLink').value, qrLink: document.getElementById('inpQrLink').value,
-            category: document.getElementById('inpCategory').value
+            title: document.getElementById('inpTitle').value, desc: document.getElementById('inpDesc').value,
+            icon: iconRaw, link: document.getElementById('inpLink').value, editLink: document.getElementById('inpEditLink').value,
+            qrLink: document.getElementById('inpQrLink').value, category: document.getElementById('inpCategory').value
         };
         const idx = parseInt(document.getElementById('editIndex').value);
         if(!data.title || !data.link) return alert("Wajib diisi!");
         if(idx === -1) projects.push(data); else projects[idx] = data;
-        localStorage.setItem('myProjectsDB', JSON.stringify(projects));
-        init(); closeModal('projectModal');
+        localStorage.setItem('myProjectsDB', JSON.stringify(projects)); init(); closeModal('projectModal');
     }
     function editProject(i) {
-        const p = projects[i];
-        document.getElementById('editIndex').value = i;
+        const p = projects[i]; document.getElementById('editIndex').value = i;
         document.getElementById('inpTitle').value = p.title; document.getElementById('inpDesc').value = p.desc;
         document.getElementById('inpIcon').value = p.icon; document.getElementById('inpLink').value = p.link;
         document.getElementById('inpEditLink').value = p.editLink; document.getElementById('inpQrLink').value = p.qrLink || '';
@@ -451,19 +484,6 @@
             localStorage.setItem('myProjectsDB', JSON.stringify(projects)); init();
         }
     }
-    function renderThemeOptions() {
-        const grid = document.getElementById('themeGrid'); grid.innerHTML = '';
-        themes.forEach((t, i) => {
-            const opt = document.createElement('div'); opt.className = `theme-opt ${i === tempThemeIdx ? 'active' : ''}`;
-            opt.style.setProperty('--s', t.s); opt.style.setProperty('--e', t.e);
-            opt.onclick = () => { tempThemeIdx = i; renderThemeOptions(); }; grid.appendChild(opt);
-        });
-    }
-    function saveHeaderConfig() {
-        config.title = document.getElementById('cfgTitle').value; config.logo = document.getElementById('cfgLogo').value;
-        config.repo = document.getElementById('cfgRepo').value; config.themeIdx = tempThemeIdx;
-        localStorage.setItem('dashboardConfig', JSON.stringify(config)); init(); closeModal('headerModal');
-    }
     function showQr(index) {
         const p = projects[index]; const targetUrl = p.qrLink ? p.qrLink : p.link;
         document.getElementById('qrTitleDisplay').innerText = p.title; document.getElementById('qrLinkDisplay').innerText = targetUrl;
@@ -471,11 +491,10 @@
         document.getElementById('qrImage').src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&color=000000&bgcolor=ffffff&data=${encodeURIComponent(targetUrl)}`;
         document.getElementById('qrModal').style.display = 'flex';
     }
-    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
     function backupData() {
         const bundle = { projects, config, pages };
         const blob = new Blob([JSON.stringify(bundle)], {type: 'application/json'});
-        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `backup_ebtaq_v3.json`; a.click();
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `backup_ebtaq_v3.2.json`; a.click();
     }
     function restoreData() { document.getElementById('fileInput').click(); }
     function handleFileSelect(input) {
@@ -484,9 +503,7 @@
             const data = JSON.parse(e.target.result);
             if(data.projects && data.config) {
                 projects = data.projects; config = data.config; if(data.pages) pages = data.pages; 
-                localStorage.setItem('myProjectsDB', JSON.stringify(projects));
-                localStorage.setItem('dashboardConfig', JSON.stringify(config));
-                localStorage.setItem('dashboardPages', JSON.stringify(pages));
+                localStorage.setItem('myProjectsDB', JSON.stringify(projects)); localStorage.setItem('dashboardConfig', JSON.stringify(config)); localStorage.setItem('dashboardPages', JSON.stringify(pages));
                 init(); alert("Berhasil Restore!");
             }
         }; reader.readAsText(input.files[0]);
