@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard EBTAQ | v3.2 Egalitarian</title>
+    <title>Dashboard EBTAQ | v3.2 Egalitarian Cloud</title>
     <style>
         :root {
             --bg-color: #f8fafc;
@@ -143,7 +143,7 @@
             display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 999;
             transition: all 0.3s ease;
         }
-        .floating-gear:hover { background: var(--accent); transform: rotate(90deg); opacity: 1 !important; }
+        .floating-gear:hover { background: var(--grad-end); transform: rotate(90deg); opacity: 1 !important; color: #000; }
         .floating-gear svg { width: 24px; height: 24px; fill: currentColor; }
 
         /* MODALS */
@@ -250,26 +250,23 @@
     <input type="file" id="fileInput" style="display: none;" onchange="handleFileSelect(this)">
 
 <script>
+    // =========================================================
+    // PASTIKAN URL WEB APP DI BAWAH INI DIGANTI DENGAN MILIK ANDA
+    // =========================================================
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyhLPzD-4yXWAKcj66Y78qixX7oUYKi_FaY6RD9tc28KuUg4BaFh-0p_RVDaDsWY9cD/exec";
+
     // --- DB INIT ---
     let projects = JSON.parse(localStorage.getItem('myProjectsDB')) || [];
-    // Config: Hapus 'title' karena sekarang dinamis
     let config = JSON.parse(localStorage.getItem('dashboardConfig')) || { logo: "QIRAATI.png", themeIdx: 7, repo: "" };
-    
-    // Default Pages: Jika kosong, buat 1 halaman awal
-    let pages = JSON.parse(localStorage.getItem('dashboardPages')) || [
-        { id: 'p1', name: 'BERANDA', icon: '<svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>' }
-    ];
+    let pages = JSON.parse(localStorage.getItem('dashboardPages')) || [{ id: 'p1', name: 'BERANDA', icon: null }];
 
-    // Migration Check (Map old data to first page)
     let hasMigration = false;
     projects.forEach(p => { 
         if (!p.category) { p.category = pages[0].id; hasMigration = true; } 
     });
     if(hasMigration) localStorage.setItem('myProjectsDB', JSON.stringify(projects));
 
-    // State
     let activePageId = pages[0].id;
-    // Cek jika activePageId yang tersimpan (jika ada sesi sebelumnya) masih valid? Jika tidak, reset ke 0.
     if(!pages.find(p => p.id === activePageId)) activePageId = pages[0].id;
 
     let isEditMode = false;
@@ -282,6 +279,77 @@
         { s: "#334155", e: "#94a3b8", t: "#ffffff" }, { s: "#1a1a1a", e: "#FFC40D", t: "#FFC40D" }
     ];
 
+    window.onload = async () => {
+        init(); // Tampilkan versi lokal secara instan
+        await loadFromCloud(); // Tarik pembaruan di latar belakang
+    };
+
+    // --- FUNGSI CLOUD SYNC ---
+    async function loadFromCloud() {
+        if (SCRIPT_URL === "URL_WEB_APP_ANDA_DISINI") return;
+        
+        try {
+            const res = await fetch(SCRIPT_URL + "?action=getDashboard");
+            const data = await res.json();
+            
+            if(data && data.projects) {
+                projects = data.projects;
+                config = data.config;
+                pages = data.pages;
+                
+                // Simpan cache ke komputer pengguna
+                localStorage.setItem('myProjectsDB', JSON.stringify(projects));
+                localStorage.setItem('dashboardConfig', JSON.stringify(config));
+                localStorage.setItem('dashboardPages', JSON.stringify(pages));
+                
+                if(!pages.find(p => p.id === activePageId)) activePageId = pages[0].id;
+                init(); // Refresh UI dengan data awan
+            }
+        } catch(e) {
+            console.warn("Gagal terhubung ke Cloud. Mode Offline Aktif.");
+        }
+    }
+
+    function syncToCloud() {
+        // 1. Simpan Lokal untuk Backup & Akses Cepat
+        localStorage.setItem('myProjectsDB', JSON.stringify(projects));
+        localStorage.setItem('dashboardConfig', JSON.stringify(config));
+        localStorage.setItem('dashboardPages', JSON.stringify(pages));
+
+        if (SCRIPT_URL === "URL_WEB_APP_ANDA_DISINI") return;
+
+        // 2. Kirim Pembaruan ke Google Sheets (Cloud)
+        const bundle = { projects, config, pages };
+        
+        let syncInd = document.getElementById('syncIndicator');
+        if (!syncInd) {
+            syncInd = document.createElement('div');
+            syncInd.id = 'syncIndicator';
+            syncInd.style.cssText = "position:fixed; top:20px; left:50%; transform:translateX(-50%); background:#f59e0b; color:white; padding:8px 20px; border-radius:30px; font-size:12px; font-weight:bold; z-index:9999; box-shadow:0 4px 10px rgba(0,0,0,0.2);";
+            document.body.appendChild(syncInd);
+        }
+        syncInd.innerText = "☁️ Menyimpan ke Server...";
+        syncInd.style.background = "#f59e0b";
+        syncInd.style.display = 'block';
+
+        fetch(SCRIPT_URL + "?action=saveDashboard", {
+            method: 'POST',
+            body: JSON.stringify(bundle),
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+        }).then(res => res.json()).then(res => {
+            if(res.success) {
+                syncInd.innerText = "✅ Tersimpan Global!";
+                syncInd.style.background = "#10b981";
+                setTimeout(() => syncInd.style.display = 'none', 2500);
+            } else { throw new Error("Gagal"); }
+        }).catch(e => {
+            syncInd.innerText = "❌ Gagal Terhubung ke Server";
+            syncInd.style.background = "#ef4444";
+            setTimeout(() => syncInd.style.display = 'none', 3000);
+        });
+    }
+
+    // --- RENDER & LOGIKA UI ---
     function init() { renderSidebar(); renderMain(); }
 
     function renderSidebar() {
@@ -305,11 +373,9 @@
         document.getElementById('navLogo').src = config.logo;
         document.getElementById('navRepo').href = config.repo || "#";
 
-        // --- JUDUL = NAMA HALAMAN ---
         const activePageObj = pages.find(p => p.id === activePageId) || pages[0];
         document.getElementById('navTitle').innerText = activePageObj.name;
 
-        // Render Kartu (Hide/Show Logic)
         const container = document.getElementById('cardContainer');
         const filteredProjects = projects.filter(p => p.category === activePageId);
         
@@ -344,15 +410,13 @@
         });
     }
 
-    // --- PAGE MANAGER (EGALITARIAN LOGIC) ---
     function addNewPage() {
         const name = document.getElementById('newPageName').value;
         if(!name) return;
         const id = 'pg_' + Date.now();
         pages.push({ id: id, name: name, icon: null });
-        localStorage.setItem('dashboardPages', JSON.stringify(pages));
         document.getElementById('newPageName').value = '';
-        renderPageList(); init();
+        syncToCloud(); renderPageList(); init();
     }
 
     function renderPageList() {
@@ -378,8 +442,7 @@
         const newName = prompt("Nama Baru untuk Halaman:", pages[index].name);
         if(newName && newName.trim() !== "") {
             pages[index].name = newName;
-            localStorage.setItem('dashboardPages', JSON.stringify(pages));
-            renderPageList(); init();
+            syncToCloud(); renderPageList(); init();
         }
     }
 
@@ -387,34 +450,24 @@
         const targetIndex = index + direction;
         if(targetIndex >= 0 && targetIndex < pages.length) {
             [pages[index], pages[targetIndex]] = [pages[targetIndex], pages[index]];
-            localStorage.setItem('dashboardPages', JSON.stringify(pages));
-            renderPageList(); init();
+            syncToCloud(); renderPageList(); init();
         }
     }
 
     function deletePage(index) {
         if(pages.length <= 1) return alert("Minimal harus ada satu halaman!");
-        
         if(confirm(`Hapus halaman "${pages[index].name}"? Proyek di dalamnya akan dipindah ke halaman pertama.`)) {
             const pageIdToDelete = pages[index].id;
-            
-            // Remove Page
             pages.splice(index, 1);
-            localStorage.setItem('dashboardPages', JSON.stringify(pages));
-
-            // Move Orphans to First Page
+            
             const fallbackId = pages[0].id;
             projects.forEach(p => { if(p.category === pageIdToDelete) p.category = fallbackId; });
-            localStorage.setItem('myProjectsDB', JSON.stringify(projects));
-
-            // Reset active page if deleted
             if(activePageId === pageIdToDelete) activePageId = fallbackId;
             
-            renderPageList(); init();
+            syncToCloud(); renderPageList(); init();
         }
     }
 
-    // --- MODALS ---
     function openHeaderModal() {
         if(!isEditMode) return;
         document.getElementById('cfgLogo').value = config.logo;
@@ -425,17 +478,15 @@
     }
 
     function saveHeaderConfig() {
-        // Hapus save Title dari sini, karena Title diambil dari Page Name
         config.logo = document.getElementById('cfgLogo').value;
         config.repo = document.getElementById('cfgRepo').value;
         config.themeIdx = tempThemeIdx;
-        localStorage.setItem('dashboardConfig', JSON.stringify(config));
-        init(); closeModal('headerModal');
+        syncToCloud(); init(); closeModal('headerModal');
     }
 
-    // --- (SISA FUNCTION SAMA: CRUD, THEME, QR, BACKUP) ---
     function toggleEditMode() { isEditMode = !isEditMode; document.body.classList.toggle('edit-active', isEditMode); init(); }
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+    
     function renderThemeOptions() {
         const grid = document.getElementById('themeGrid'); grid.innerHTML = '';
         themes.forEach((t, i) => {
@@ -444,6 +495,7 @@
             opt.onclick = () => { tempThemeIdx = i; renderThemeOptions(); }; grid.appendChild(opt);
         });
     }
+
     function saveProject() {
         let iconRaw = document.getElementById('inpIcon').value;
         if(iconRaw.includes('<svg')) iconRaw = iconRaw.replace(/fill=['"][^'"]*['"]/gi, "");
@@ -455,8 +507,10 @@
         const idx = parseInt(document.getElementById('editIndex').value);
         if(!data.title || !data.link) return alert("Wajib diisi!");
         if(idx === -1) projects.push(data); else projects[idx] = data;
-        localStorage.setItem('myProjectsDB', JSON.stringify(projects)); init(); closeModal('projectModal');
+        
+        syncToCloud(); init(); closeModal('projectModal');
     }
+
     function editProject(i) {
         const p = projects[i]; document.getElementById('editIndex').value = i;
         document.getElementById('inpTitle').value = p.title; document.getElementById('inpDesc').value = p.desc;
@@ -466,6 +520,7 @@
         pages.forEach(pg => { const opt = document.createElement('option'); opt.value = pg.id; opt.innerText = pg.name; if(pg.id === p.category) opt.selected = true; catSelect.appendChild(opt); });
         document.getElementById('projectModal').style.display = 'flex';
     }
+
     function openModal() {
         document.getElementById('editIndex').value = '-1';
         ['inpTitle','inpDesc','inpIcon','inpLink','inpEditLink','inpQrLink'].forEach(id => document.getElementById(id).value = '');
@@ -473,7 +528,9 @@
         pages.forEach(pg => { const opt = document.createElement('option'); opt.value = pg.id; opt.innerText = pg.name; if(pg.id === activePageId) opt.selected = true; catSelect.appendChild(opt); });
         document.getElementById('projectModal').style.display = 'flex';
     }
-    function deleteProject(i) { if(confirm("Hapus?")) { projects.splice(i,1); localStorage.setItem('myProjectsDB', JSON.stringify(projects)); init(); } }
+
+    function deleteProject(i) { if(confirm("Hapus?")) { projects.splice(i,1); syncToCloud(); init(); } }
+    
     function moveProject(realIdx, dir) {
         const currentCat = projects[realIdx].category; let subsetIndices = [];
         projects.forEach((p, idx) => { if(p.category === currentCat) subsetIndices.push(idx); });
@@ -481,9 +538,10 @@
         if(targetSubsetPos >= 0 && targetSubsetPos < subsetIndices.length) {
             let targetRealIdx = subsetIndices[targetSubsetPos];
             [projects[realIdx], projects[targetRealIdx]] = [projects[targetRealIdx], projects[realIdx]];
-            localStorage.setItem('myProjectsDB', JSON.stringify(projects)); init();
+            syncToCloud(); init();
         }
     }
+
     function showQr(index) {
         const p = projects[index]; const targetUrl = p.qrLink ? p.qrLink : p.link;
         document.getElementById('qrTitleDisplay').innerText = p.title; document.getElementById('qrLinkDisplay').innerText = targetUrl;
@@ -491,11 +549,13 @@
         document.getElementById('qrImage').src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&color=000000&bgcolor=ffffff&data=${encodeURIComponent(targetUrl)}`;
         document.getElementById('qrModal').style.display = 'flex';
     }
+
     function backupData() {
         const bundle = { projects, config, pages };
         const blob = new Blob([JSON.stringify(bundle)], {type: 'application/json'});
-        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `backup_ebtaq_v3.2.json`; a.click();
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `backup_ebtaq_v3.2_cloud.json`; a.click();
     }
+
     function restoreData() { document.getElementById('fileInput').click(); }
     function handleFileSelect(input) {
         const reader = new FileReader();
@@ -503,15 +563,13 @@
             const data = JSON.parse(e.target.result);
             if(data.projects && data.config) {
                 projects = data.projects; config = data.config; if(data.pages) pages = data.pages; 
-                localStorage.setItem('myProjectsDB', JSON.stringify(projects)); localStorage.setItem('dashboardConfig', JSON.stringify(config)); localStorage.setItem('dashboardPages', JSON.stringify(pages));
-                init(); alert("Berhasil Restore!");
+                syncToCloud(); init(); alert("Berhasil Restore & Sync ke Server!");
             }
         }; reader.readAsText(input.files[0]);
     }
+
     window.addEventListener('keydown', (e) => { if(e.key === 'Shift') document.body.classList.add('shift-on'); });
     window.addEventListener('keyup', (e) => { if(e.key === 'Shift') document.body.classList.remove('shift-on'); });
-
-    init();
 </script>
 </body>
 </html>
